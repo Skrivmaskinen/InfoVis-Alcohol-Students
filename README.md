@@ -10,3 +10,5 @@ How to get server to start:
 2. cd to the project
 3. type 'http-server' in comandwindow
 4. go to the localhost webpage printed in the comandwindow, usually http://127.0.0.1:8080 
+
+Taken from 'https://gist.github.com/jgravois/5e73b56fa7756fd00b89'
