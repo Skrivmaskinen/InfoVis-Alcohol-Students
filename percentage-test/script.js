@@ -134,7 +134,6 @@
 						var widthText = tooltipText.length * 7;
 						tooltip.selectAll("rect").attr("width", widthText);
 						tooltip.selectAll("text").attr("x", widthText/2);
-						console.log(widthText);
 					});
 
 
@@ -162,7 +161,6 @@
 						var widthText = tooltipText.length * 7;
 						tooltip.selectAll("rect").attr("width", widthText);
 						tooltip.selectAll("text").attr("x", widthText / 2);
-						console.log(widthText);
 					});
 
 				presum = 0;
