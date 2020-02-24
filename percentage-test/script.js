@@ -37,111 +37,121 @@
 		var perEntryFiltered = 1/datafiltered.length;
 		var perEntry = 1/data.length;
 
+		drawBars();
 
-		for(var dim = 0; dim < dimensions.length; dim++){
+		function drawBars(){
 
+			var dim = -1;
+			dimensions.forEach(function(category){
+				dim++;
 			
-			var xStart = dim*(barWidth+barSpace); 
+				var xStart = dim*(barWidth+barSpace); 
 
-			var category = dimensions[dim];
+				var category = dimensions[dim];
 
-			var nanCategory = isNaN(datafiltered[0][category]);
+				var nanCategory = isNaN(datafiltered[0][category]);
 
-			var sumFilteredData = d3.nest()
-				.key(function(d) { return d[category];})
-				.rollup(function(d) { 
-					return d3.sum(d, function(g) {return perEntryFiltered }) 
-				})
-				.entries(datafiltered)
-				.sort(function(x, y){
-					return nanCategory ? d3.ascending(x.key, y.key) : d3.ascending(+x.key, +y.key);
-				})
+				var sumFilteredData = d3.nest()
+					.key(function(d) { return d[category];})
+					.rollup(function(d) { 
+						return d3.sum(d, function(g) {return perEntryFiltered }) 
+					})
+					.entries(datafiltered)
+					.sort(function(x, y){
+						return nanCategory ? d3.ascending(x.key, y.key) : d3.ascending(+x.key, +y.key);
+					})
 			
-			var sumData = d3.nest()
-				.key(function(d) { return d[category];})
-				.rollup(function(d) { 
-					return d3.sum(d, function(g) {return perEntry }) 
-				})
-				.entries(data)
-				.sort(function(x, y){
-					return nanCategory ? d3.ascending(x.key, y.key) : d3.ascending(+x.key, +y.key);
-				})
-				sumData = sumData.reverse();
-				sumFilteredData = sumFilteredData.reverse();
-			console.log("sumdata: ");
-			console.log(sumData);
-			console.log("sumFilteredData: ");
-			console.log(sumFilteredData);
+				var sumData = d3.nest()
+					.key(function(d) { return d[category];})
+					.rollup(function(d) { 
+						return d3.sum(d, function(g) {return perEntry }) 
+					})
+					.entries(data)
+					.sort(function(x, y){
+						return nanCategory ? d3.ascending(x.key, y.key) : d3.ascending(+x.key, +y.key);
+					})
+					sumData = sumData.reverse();
+					sumFilteredData = sumFilteredData.reverse();
+				console.log("sumdata: ");
+				console.log(sumData);
+				console.log("sumFilteredData: ");
+				console.log(sumFilteredData);
 
 
-			var y = d3.scaleLinear()
-				.domain([0,1])
-				.range([width/2, 0])
+				var y = d3.scaleLinear()
+					.domain([0,1])
+					.range([width/2, 0])
 		
 
 
-			var presum = 0;
+				var presum = 0;
 	
-			var bar = svg.append("g");
+				var bar = svg.append("g");
 
-			function blubb() {
-				console.log("blubb");
-			}
+				function blubb() {
+					console.log("blubb");
+				}
 
-			bar.selectAll("bar")
-				.data(sumFilteredData)
-				.enter().append("rect")
-				.style("fill", function(d, i) { return colorbrewer.Set1[Math.max(3, Math.min(9, sumData.length))][i%9] })
-				.attr("y", xStart)
-				.attr("height", barWidth)
-				.attr("x", function(d, i) { return y(presum += d.value) })
-				.attr("width", function(d,i) { return y(1-d.value)});
+				bar.selectAll("bar")
+					.data(sumFilteredData)
+					.enter().append("rect")
+					.attr("class", "bigBar")
+					.style("fill", function(d, i) { return colorbrewer.Set1[Math.max(3, Math.min(9, sumData.length))][i%9] })
+					.attr("y", xStart)
+					.attr("height", barWidth)
+					.attr("x", function(d, i) { return y(presum += d.value) })
+					.attr("width", function(d,i) { return y(1-d.value)})
+					.on('click', function(d,i){
+						console.log(category);
+						datafiltered = data.filter(function (d2) { return d2[category] == d.key })
+						console.log(datafiltered)
+						drawBars();
+					});
 
 
+				presum = 0;
 
-			presum = 0;
+				var smallBar = svg.append("g");
 
-			var smallBar = svg.append("g");
+				smallBar.selectAll("bar")
+					.data(sumData)
+					.enter().append("rect")
+					.style("fill", function(d, i) { return colorbrewer.Pastel1[Math.max(3, Math.min(9, sumData.length))][i%9]  })
+					.attr("y", xStart + barWidth)
+					.attr("height", sideBarWidth)
+					.attr("x", function(d, i) { return y(presum += d.value) })
+					.attr("width", function(d,i) { return y(1-d.value)});
 
-			smallBar.selectAll("bar")
-				.data(sumData)
-				.enter().append("rect")
-				.style("fill", function(d, i) { return colorbrewer.Pastel1[Math.max(3, Math.min(9, sumData.length))][i%9]  })
-				.attr("y", xStart + barWidth)
-				.attr("height", sideBarWidth)
-				.attr("x", function(d, i) { return y(presum += d.value) })
-				.attr("width", function(d,i) { return y(1-d.value)});
+				presum = 0;
 
-			presum = 0;
+				bar.selectAll("text")
+					.data(sumFilteredData)
+					.enter()
+					.append("text")
+					.text(function(d){ return d.value > 0.05 ? trim(d.key) : ""})
+					.attr("y", xStart + barWidth/2)
+					.attr("x", function(d, i) { presum += d.value; return y(presum - d.value/2)+5 })
+					.attr("text-anchor", "middle")
+					.style("font-size", barTextSize)
+					.style("max-width", "20px")
+    				.style("fill", "white")
 
-			bar.selectAll("text")
-				.data(sumFilteredData)
-				.enter()
-				.append("text")
-				.text(function(d){ return d.value > 0.05 ? trim(d.key) : ""})
-				.attr("y", xStart + barWidth/2)
-				.attr("x", function(d, i) { presum += d.value; return y(presum - d.value/2)+5 })
-				.attr("text-anchor", "middle")
-				.style("font-size", barTextSize)
-				.style("max-width", "20px")
-    			.style("fill", "white")
-
-			bar.selectAll("text")
-				.data(sumFilteredData)
-				.enter()
-				.append("text")
-				.text(function(d){ return "banan"})
-				.attr("y", xStart + barWidth/2)
-				.attr("x", function(d, i) { presum += d.value; return y(presum - d.value/2)+5 })
-				.attr("text-anchor", "middle")
-				.style("font-size", barTextSize)
-				.style("max-width", "20px")
-    			.style("fill", "black")
+				bar.selectAll("text")
+					.data(sumFilteredData)
+					.enter()
+					.append("text")
+					.text(function(d){ return "banan"})
+					.attr("y", xStart + barWidth/2)
+					.attr("x", function(d, i) { presum += d.value; return y(presum - d.value/2)+5 })
+					.attr("text-anchor", "middle")
+					.style("font-size", barTextSize)
+					.style("max-width", "20px")
+    				.style("fill", "black")
 
 		
-			function trim(text){
-				return text.length > MAXTEXT ? text.substring(0, MAXTEXT-1) + "-" : text;
-			}
+				function trim(text){
+					return text.length > MAXTEXT ? text.substring(0, MAXTEXT-1) + "-" : text;
+				}
+			});
 		}
-		
     });
