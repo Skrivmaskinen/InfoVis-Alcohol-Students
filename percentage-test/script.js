@@ -86,6 +86,19 @@
 		
 
 
+				function getIndexByKey(list, keyName)
+				{
+					for(let i = 0; i < list.length; ++i)
+					{
+						if(list[i].key === keyName)
+						{
+							return i;
+						}
+					}
+					console.log("ERROR: could not find index!");
+					return -1;
+				}
+
 				var presum = 0;
 	
 				var bar = svg.append("g");
@@ -98,7 +111,7 @@
 					.data(sumFilteredData)
 					.enter().append("rect")
 					.attr("class", "bigBar")
-					.style("fill", function(d, i) { return colorbrewer.Set1[Math.max(3, Math.min(9, sumData.length))][i%9] })
+					.style("fill", function(d, i) { return colorbrewer.Set1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9] })
 					.attr("y", xStart)
 					.attr("height", barWidth)
 					.attr("x", function(d, i) { return y(presum += d.value) })
