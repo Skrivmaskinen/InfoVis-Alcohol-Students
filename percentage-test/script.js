@@ -210,10 +210,13 @@
 					.style("max-width", "20px")
 					.style("fill", "white")
 					.style("user-select", "none")
-					.on('click', function (d, i) {
-						console.log(category);
-						datafiltered = data.filter(function (d2) { return d2[category] == d.key })
-						console.log(datafiltered)
+					.on('click', function(d,i){
+						if(!filters[category].includes(d.key)){
+							filters[category].push(d.key);
+						} else {
+							filters[category].pop(d.key);
+						}
+						
 						drawBars();
 					})
 					.on("mouseover", function () { tooltip.style("display", null); })
