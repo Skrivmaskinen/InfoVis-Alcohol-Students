@@ -34,12 +34,14 @@
 
 		console.log(datafiltered);
 		
-		var perEntryFiltered = 1/datafiltered.length;
-		var perEntry = 1/data.length;
+		
 
 		drawBars();
 
 		function drawBars(){
+
+			var perEntryFiltered = 1/datafiltered.length;
+			var perEntry = 1/data.length;
 
 			var dim = -1;
 			dimensions.forEach(function(category){
