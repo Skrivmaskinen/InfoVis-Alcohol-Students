@@ -1,8 +1,8 @@
 
     // set the dimensions and margins of the graph
     var margin = {top: 100, right: 100, bottom: 10, left: 10},
-    width = 4000 - margin.left - margin.right,
-    height = window.innerHeight - margin.top - margin.bottom;
+    width = window.innerWidth - margin.left - margin.right,
+    height = 6000 - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
     var svg = d3.select("#my_dataviz")
@@ -14,9 +14,9 @@
     "translate(" + margin.left + "," + margin.top + ")");
 
 
-	var barWidth = 80;
-	var sideBarWidth = 10;
-	var barSpace = 30;
+	var barWidth = 50;
+	var sideBarWidth = 20;
+	var barSpace = 70;
 	var barTextSize = "26px";
 	var MAXTEXT = 6;
 
@@ -33,9 +33,7 @@
 		datafiltered = data.filter(function (d) { return d.health==1 })
 
 		console.log(datafiltered);
-		var colors = ['#225ea8','#253494','#081d58', '#ffffcc','#ffeda0','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#bd0026','#800026'].reverse();
-		// var colors = ["b33040", "#d25c4d", "#f2b447", "#d9d574","b33040", "#d25c4d", "#f2b447", "#d9d574","b33040", "#d25c4d", "#f2b447", "#d9d574"];
-
+		
 		var perEntryFiltered = 1/datafiltered.length;
 		var perEntry = 1/data.length;
 
@@ -68,14 +66,17 @@
 				.sort(function(x, y){
 					return nanCategory ? d3.ascending(x.key, y.key) : d3.ascending(+x.key, +y.key);
 				})
-
+				sumData = sumData.reverse();
+				sumFilteredData = sumFilteredData.reverse();
+			console.log("sumdata: ");
 			console.log(sumData);
+			console.log("sumFilteredData: ");
 			console.log(sumFilteredData);
 
 
 			var y = d3.scaleLinear()
 				.domain([0,1])
-				.range([height, 0])
+				.range([width/2, 0])
 		
 
 
@@ -90,11 +91,11 @@
 			bar.selectAll("bar")
 				.data(sumFilteredData)
 				.enter().append("rect")
-				.style("fill", function(d, i) { return colors[i] })
-				.attr("x", xStart)
-				.attr("width", barWidth)
-				.attr("y", function(d, i) { return y(presum += d.value) })
-				.attr("height", function(d,i) { return y(1-d.value)});
+				.style("fill", function(d, i) { return colorbrewer.Set1[Math.max(3, Math.min(9, sumData.length))][i%9] })
+				.attr("y", xStart)
+				.attr("height", barWidth)
+				.attr("x", function(d, i) { return y(presum += d.value) })
+				.attr("width", function(d,i) { return y(1-d.value)});
 
 
 
@@ -105,11 +106,11 @@
 			smallBar.selectAll("bar")
 				.data(sumData)
 				.enter().append("rect")
-				.style("fill", function(d, i) { return colors[i] })
-				.attr("x", xStart + barWidth)
-				.attr("width", sideBarWidth)
-				.attr("y", function(d, i) { return y(presum += d.value) })
-				.attr("height", function(d,i) { return y(1-d.value)});
+				.style("fill", function(d, i) { return colorbrewer.Pastel1[Math.max(3, Math.min(9, sumData.length))][i%9]  })
+				.attr("y", xStart + barWidth)
+				.attr("height", sideBarWidth)
+				.attr("x", function(d, i) { return y(presum += d.value) })
+				.attr("width", function(d,i) { return y(1-d.value)});
 
 			presum = 0;
 
@@ -118,12 +119,24 @@
 				.enter()
 				.append("text")
 				.text(function(d){ return d.value > 0.05 ? trim(d.key) : ""})
-				.attr("x", xStart + barWidth/2)
-				.attr("y", function(d, i) { presum += d.value; return y(presum - d.value/2)+5 })
+				.attr("y", xStart + barWidth/2)
+				.attr("x", function(d, i) { presum += d.value; return y(presum - d.value/2)+5 })
 				.attr("text-anchor", "middle")
 				.style("font-size", barTextSize)
 				.style("max-width", "20px")
     			.style("fill", "white")
+
+			bar.selectAll("text")
+				.data(sumFilteredData)
+				.enter()
+				.append("text")
+				.text(function(d){ return "banan"})
+				.attr("y", xStart + barWidth/2)
+				.attr("x", function(d, i) { presum += d.value; return y(presum - d.value/2)+5 })
+				.attr("text-anchor", "middle")
+				.style("font-size", barTextSize)
+				.style("max-width", "20px")
+    			.style("fill", "black")
 
 		
 			function trim(text){
