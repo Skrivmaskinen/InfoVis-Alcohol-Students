@@ -20,7 +20,7 @@
 	var barTextSize = "26px";
 	var MAXTEXT = 6;
 
-	var filters = [];
+	
 
     // Parse the Data
     d3.csv("../student-por.csv", function(data) {
@@ -28,24 +28,57 @@
         // Extract the list of dimensions we want to keep in the plot.!isNaN(data[0][d]) Here I keep all except the column called Species
         dimensions = d3.keys(data[0]).filter(function (d) { return true })
 
+		var filters = [];
+		dimensions.forEach(function(category){
+			filters[category] = [];
+		});
 		
-		// FILTER
-		datafiltered = data.filter(function (d) { return d.health==1 })
 
-		console.log(datafiltered);
-		
+
+
+
+		function filterCheck(d, cat = null){
+			var include = true;
+			dimensions.forEach(function(category){
+				var cat_filters = filters[category];
+				
+				if(cat_filters.length > 0 && cat != category){
+					var truecurrent = false;
+					cat_filters.forEach(function(filterkey){
+						if(d[category] == filterkey) truecurrent = true;
+					});
+					if(truecurrent == false){
+						include = false;
+						return false;
+					}
+				}
+			});
+			return include;
+		}
+
+
+
 		
 
 		drawBars();
 
 		function drawBars(){
 
-			var perEntryFiltered = 1/datafiltered.length;
-			var perEntry = 1/data.length;
+			console.log(data.filter(function (d) { return filterCheck(d) }));
+			console.log(filters);
 
 			var dim = -1;
 			dimensions.forEach(function(category){
 				dim++;
+
+				if(filters[category].length == 0){
+					var datafiltered = data.filter(function (d) { return filterCheck(d, category) })
+				} else{
+					var datafiltered = data;
+				}
+
+				var perEntryFiltered = 1/datafiltered.length;
+				var perEntry = 1/data.length;
 			
 				var xStart = dim*(barWidth+barSpace); 
 
@@ -74,10 +107,6 @@
 					})
 					sumData = sumData.reverse();
 					sumFilteredData = sumFilteredData.reverse();
-				console.log("sumdata: ");
-				console.log(sumData);
-				console.log("sumFilteredData: ");
-				console.log(sumFilteredData);
 
 
 				var y = d3.scaleLinear()
@@ -117,9 +146,12 @@
 					.attr("x", function(d, i) { return y(presum += d.value) })
 					.attr("width", function(d,i) { return y(1-d.value)})
 					.on('click', function(d,i){
-						console.log(category);
-						datafiltered = data.filter(function (d2) { return d2[category] == d.key })
-						console.log(datafiltered)
+						if(!filters[category].includes(d.key)){
+							filters[category].push(d.key);
+						} else {
+							filters[category].pop(d.key);
+						}
+						
 						drawBars();
 					})
 					.on("mouseover", function () { tooltip.style("display", null); })
