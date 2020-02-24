@@ -208,19 +208,27 @@
 					.attr("text-anchor", "middle")
 					.style("font-size", barTextSize)
 					.style("max-width", "20px")
-    				.style("fill", "white")
-
-				bar.selectAll("text")
-					.data(sumFilteredData)
-					.enter()
-					.append("text")
-					.text(function(d){ return "banan"})
-					.attr("y", xStart + barWidth/2)
-					.attr("x", function(d, i) { presum += d.value; return y(presum - d.value/2)+5 })
-					.attr("text-anchor", "middle")
-					.style("font-size", barTextSize)
-					.style("max-width", "20px")
-    				.style("fill", "black")
+					.style("fill", "white")
+					.style("user-select", "none")
+					.on('click', function (d, i) {
+						console.log(category);
+						datafiltered = data.filter(function (d2) { return d2[category] == d.key })
+						console.log(datafiltered)
+						drawBars();
+					})
+					.on("mouseover", function () { tooltip.style("display", null); })
+					.on("mouseout", function () { tooltip.style("display", "none"); })
+					.on("mousemove", function (d) {
+						var xPosition = d3.mouse(this)[0] - 15;
+						var yPosition = d3.mouse(this)[1] - 25;
+						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+						var num = d.value * 100;
+						var tooltipText = d.key + ": " + num.toFixed(0) + "%";
+						tooltip.select("text").text(tooltipText);
+						var widthText = tooltipText.length * 7;
+						tooltip.selectAll("rect").attr("width", widthText);
+						tooltip.selectAll("text").attr("x", widthText / 2);
+					});
 
 		
 				function trim(text){
