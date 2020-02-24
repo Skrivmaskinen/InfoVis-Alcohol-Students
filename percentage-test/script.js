@@ -1,8 +1,8 @@
 
     // set the dimensions and margins of the graph
-    var margin = {top: 10, right: 10, bottom: 10, left: 10},
-    width = 5000 - margin.left - margin.right,
-    height = 800 - margin.top - margin.bottom;
+    var margin = {top: 100, right: 100, bottom: 10, left: 10},
+    width = 4000 - margin.left - margin.right,
+    height = window.innerHeight - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
     var svg = d3.select("#my_dataviz")
@@ -33,8 +33,8 @@
 		datafiltered = data.filter(function (d) { return d.health==1 })
 
 		console.log(datafiltered);
-
-		var colors = ["b33040", "#d25c4d", "#f2b447", "#d9d574","b33040", "#d25c4d", "#f2b447", "#d9d574","b33040", "#d25c4d", "#f2b447", "#d9d574"];
+		var colors = ['#225ea8','#253494','#081d58', '#ffffcc','#ffeda0','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#bd0026','#800026'].reverse();
+		// var colors = ["b33040", "#d25c4d", "#f2b447", "#d9d574","b33040", "#d25c4d", "#f2b447", "#d9d574","b33040", "#d25c4d", "#f2b447", "#d9d574"];
 
 		var perEntryFiltered = 1/datafiltered.length;
 		var perEntry = 1/data.length;
