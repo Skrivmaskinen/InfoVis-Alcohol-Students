@@ -108,6 +108,20 @@
 						datafiltered = data.filter(function (d2) { return d2[category] == d.key })
 						console.log(datafiltered)
 						drawBars();
+					})
+					.on("mouseover", function () { tooltip.style("display", null); })
+					.on("mouseout", function () { tooltip.style("display", "none"); })
+					.on("mousemove", function (d) {
+						var xPosition = d3.mouse(this)[0] - 15;
+						var yPosition = d3.mouse(this)[1] - 25;
+						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+						var num = d.value * 100;
+						var tooltipText = d.key + ": " + num.toFixed(0) + "%";
+						tooltip.select("text").text(tooltipText);
+						var widthText = tooltipText.length * 7;
+						tooltip.selectAll("rect").attr("width", widthText);
+						tooltip.selectAll("text").attr("x", widthText/2);
+						console.log(widthText);
 					});
 
 
@@ -118,11 +132,25 @@
 				smallBar.selectAll("bar")
 					.data(sumData)
 					.enter().append("rect")
-					.style("fill", function(d, i) { return colorbrewer.Pastel1[Math.max(3, Math.min(9, sumData.length))][i%9]  })
+					.style("fill", function (d, i) { return colorbrewer.Pastel1[Math.max(3, Math.min(9, sumData.length))][i % 9] })
 					.attr("y", xStart + barWidth)
 					.attr("height", sideBarWidth)
-					.attr("x", function(d, i) { return y(presum += d.value) })
-					.attr("width", function(d,i) { return y(1-d.value)});
+					.attr("x", function (d, i) { return y(presum += d.value) })
+					.attr("width", function (d, i) { return y(1 - d.value) })
+					.on("mouseover", function () { tooltip.style("display", null); })
+					.on("mouseout", function () { tooltip.style("display", "none"); })
+					.on("mousemove", function (d) {
+						var xPosition = d3.mouse(this)[0] - 15;
+						var yPosition = d3.mouse(this)[1] - 25;
+						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+						var num = d.value * 100;
+						var tooltipText = "Unfiltered data " + d.key + ": " + num.toFixed(0) + "%";
+						tooltip.select("text").text(tooltipText);
+						var widthText = tooltipText.length * 7;
+						tooltip.selectAll("rect").attr("width", widthText);
+						tooltip.selectAll("text").attr("x", widthText / 2);
+						console.log(widthText);
+					});
 
 				presum = 0;
 
@@ -154,6 +182,26 @@
 				function trim(text){
 					return text.length > MAXTEXT ? text.substring(0, MAXTEXT-1) + "-" : text;
 				}
+
+
+				// Prep the tooltip bits, initial display is hidden
+				var tooltip = svg.append("g")
+					.attr("class", "tooltip")
+					.style("display", "none");
+
+				tooltip.append("rect")
+					.attr("width", 30)
+					.attr("height", 20)
+					.attr("fill", "white")
+					.style("opacity", 0.7);
+
+				tooltip.append("text")
+					.attr("x", 15)
+					.attr("dy", "1.2em")
+					.style("text-anchor", "middle")
+					.attr("font-size", "12px")
+					.attr("font-weight", "bold");
 			});
 		}
+
     });
