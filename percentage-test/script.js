@@ -306,7 +306,10 @@
 				}
 
 
-				// Prep the tooltip bits, initial display is hidden
+				
+			});
+
+			// Prep the tooltip bits, initial display is hidden
 				var tooltip = svg.append("g")
 					.attr("class", "tooltip")
 					.style("display", "none");
@@ -323,7 +326,6 @@
 					.style("text-anchor", "middle")
 					.attr("font-size", "12px")
 					.attr("font-weight", "bold");
-			});
 		}
 
     });
