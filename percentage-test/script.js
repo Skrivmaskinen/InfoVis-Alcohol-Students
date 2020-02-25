@@ -104,6 +104,8 @@
 
 		function drawBars(){
 
+			svg.selectAll("g").remove();
+
 			console.log(data.filter(function (d) { return filterCheck(d) }));
 			console.log(filters);
 
@@ -180,13 +182,33 @@
 					.attr("x", 15)
 					.style("font-size", "34px")
 	
+
+				if(filters[category].length > 0){
+					var backborderwidth = 6;
+					var selectedbackcolor = "#444444";
+					var background = svg.append("g");
+					background.append("rect")
+						.style("fill",selectedbackcolor)
+						.attr("y", xStart - backborderwidth)
+						.attr("height", barWidth + sideBarWidth + backborderwidth*2)
+						.attr("x", -backborderwidth)
+						.attr("width", width/2 + backborderwidth*2)
+				}
+				
+				
+				
 				var bar = svg.append("g");
 
 				bar.selectAll("bar")
 					.data(sumFilteredData)
 					.enter().append("rect")
 					.attr("class", "bigBar")
-					.style("fill", function(d, i) { return colorbrewer.Set1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9] })
+					.style("fill", function(d, i) {
+						if(filters[category].length > 0 && !filters[category].includes(d.key))
+							return colorbrewer.Pastel1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9];
+						else
+							return colorbrewer.Set1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9];
+					})
 					.attr("y", xStart)
 					.attr("height", barWidth)
 					.attr("x", function(d, i) { return y(presum += d.value) })
