@@ -20,6 +20,46 @@
 	var barTextSize = "26px";
 	var MAXTEXT = 6;
 
+	let titleLookUp = [];
+	//school,sex,age,address,famsize,Pstatus,Medu,Fedu,Mjob,Fjob,reason,guardian,traveltime,studytime,failures,schoolsup,famsup,paid,activities,nursery,
+	// higher,internet,romantic,famrel,freetime,goout,Dalc,Walc,health,absences,G1,G2,G3
+			
+	titleLookUp["school"] = "School";
+	titleLookUp["sex"] = "Sex";
+	titleLookUp["age"] = "Age";
+	titleLookUp["address"] = "Rural or Urban adress";
+	titleLookUp["famsize"] = "Size of family";
+	titleLookUp["Pstatus"] = "Parents together or apart";
+	titleLookUp["Medu"] = "Mother's education";
+	titleLookUp["Fedu"] = "Father's education";
+	titleLookUp["Mjob"] = "Mother's job";
+	titleLookUp["Fjob"] = "Father's job";
+	titleLookUp["reason"] = "Reason for school choice";
+	titleLookUp["guardian"] = "Primary guardian";
+	titleLookUp["traveltime"] = "Traveltime to school";
+	titleLookUp["studytime"] = "Weekly studytime";
+	titleLookUp["failures"] = "Number of failed classes";
+	titleLookUp["schoolsup"] = "Extra educational support";
+	titleLookUp["famsup"] = "Family educational support";
+	titleLookUp["paid"] = "Extra paid classes";
+	titleLookUp["activities"] = "Extra-corricular activities";
+	titleLookUp["nursery"] = "Attended nursery school";
+	titleLookUp["higher"] = "Wants higher education";
+	titleLookUp["internet"] = "Internet acces at home";
+	titleLookUp["romantic"] = "In a romantic relationship";
+	titleLookUp["famrel"] = "Family relationship quality";
+	titleLookUp["freetime"] = "Freetime amount";
+	titleLookUp["goout"] = "Going out with friends";
+	titleLookUp["Dalc"] = "Workday alcohol consumption";
+	titleLookUp["Walc"] = "Weekend alcohol consumption";
+	titleLookUp["health"] = "Health status";
+	titleLookUp["absences"] = "Number of abscences from school";
+	titleLookUp["G1"] = "Grade first period";
+	titleLookUp["G2"] = "Grade second period";
+	titleLookUp["G3"] = "Final grade";
+	
+			
+
 	
 
     // Parse the Data
@@ -130,12 +170,17 @@
 				}
 
 				var presum = 0;
+				//----------------------------------------------------------
+				// 							Create titels
+				//----------------------------------------------------------
+				var titels = svg.append("g")
+					.append("text")
+					.text(function(d){ return titleLookUp[category]})
+					.attr("y", xStart-10)
+					.attr("x", 15)
+					.style("font-size", "34px")
 	
 				var bar = svg.append("g");
-
-				function blubb() {
-					console.log("blubb");
-				}
 
 				bar.selectAll("bar")
 					.data(sumFilteredData)
