@@ -164,6 +164,19 @@
 					{
 						if(list[i].key === keyName)
 						{
+							/*
+							// Swap 1 and 0 to make F red and M blue. 
+							// Should probably be implemented with a more exact solution.
+							if(i === 1)
+							{
+								return 0;
+							}
+							if(i === 0)
+							{
+								return 1;
+							}
+							*/
+
 							return i;
 						}
 					}
@@ -208,9 +221,9 @@
 					.attr("class", "bigBar")
 					.style("fill", function(d, i) {
 						if(filters[category].length > 0 && !filters[category].includes(d.key))
-							return colorbrewer.Pastel1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9];
+							return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9];
 						else
-							return colorbrewer.Set1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9];
+							return colorbrewer.Set1[9][getIndexByKey(sumData, d.key)%9];
 					})
 					.attr("y", xStart)
 					.attr("height", barWidth)
