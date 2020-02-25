@@ -113,7 +113,7 @@
 			dimensions.forEach(function(category){
 				dim++;
 
-				var selecteachother = true;
+				var selecteachother = false;
 				if(selecteachother || filters[category].length == 0){
 					var datafiltered = data.filter(function (d) { return filterCheck(d, category) })
 				} else{
