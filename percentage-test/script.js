@@ -106,8 +106,6 @@
 
 			svg.selectAll("g").remove();
 
-			console.log(data.filter(function (d) { return filterCheck(d) }));
-			console.log(filters);
 
 			var dim = -1;
 			dimensions.forEach(function(category){
@@ -336,23 +334,72 @@
 				
 			});
 
+			var selectedStudents = data.filter(function (d) { return filterCheck(d) }).length;
+			var totalStudents = data.length;
+
+			var infoBox = [];
+			infoBox.x = width/2 + 40;
+			infoBox.y = 0;
+			infoBox.width = width/2-20;
+			infoBox.padding = 20;
+
+
+			var background = svg.append("g");
+					background.append("rect")
+						.style("fill","#FAFAFA")
+						.style("stroke", "#DDDDDD")
+						.style("stroke-width", 6)
+						.attr("rx", 20)
+						.attr("ry", 20)
+						.attr("y", infoBox.y)
+						.attr("height", 400)
+						.attr("x", infoBox.x)
+						.attr("width", infoBox.width)
+
+			var textcontent = svg.append("g")
+				.append("text")
+				.attr("x", infoBox.x + infoBox.padding)
+				.attr("y", infoBox.y + infoBox.padding)
+				.attr("dy", "0.5em")
+				.style("text-anchor", "start")
+				.attr("font-size", "26px")
+				.attr("font-weight", "bold")
+				.text("Selections: " + selectedStudents + "/" + totalStudents )
+
+			var offset = 50;
+			dimensions.forEach(function(category){
+				if(filters[category].length > 0){
+					
+					var a = svg.append("g")
+						.append("text")
+						.attr("x", infoBox.x + infoBox.padding)
+						.attr("y", infoBox.y + infoBox.padding + offset)
+						.attr("dy", "0.5em")
+						.style("text-anchor", "start")
+						.attr("font-size", "20px")
+						.attr("font-weight", "bold")
+						.text(category + " : " + filters[category].toString())
+						offset+= 20;
+				}
+			});
+
 			// Prep the tooltip bits, initial display is hidden
-				var tooltip = svg.append("g")
-					.attr("class", "tooltip")
-					.style("display", "none");
+			var tooltip = svg.append("g")
+				.attr("class", "tooltip")
+				.style("display", "none");
 
-				tooltip.append("rect")
-					.attr("width", 30)
-					.attr("height", 20)
-					.attr("fill", "white")
-					.style("opacity", 0.7);
+			tooltip.append("rect")
+				.attr("width", 30)
+				.attr("height", 20)
+				.attr("fill", "white")
+				.style("opacity", 0.7);
 
-				tooltip.append("text")
-					.attr("x", 15)
-					.attr("dy", "1.2em")
-					.style("text-anchor", "middle")
-					.attr("font-size", "12px")
-					.attr("font-weight", "bold");
+			tooltip.append("text")
+				.attr("x", 15)
+				.attr("dy", "1.2em")
+				.style("text-anchor", "middle")
+				.attr("font-size", "12px")
+				.attr("font-weight", "bold");
 		}
 
     });
