@@ -28,7 +28,7 @@
 	titleLookUp["sex"] = "Sex";
 	titleLookUp["age"] = "Age";
 	titleLookUp["address"] = "Rural or Urban adress";
-	titleLookUp["famsize"] = "Size of family";
+	titleLookUp["famsize"] = "Size of family(more or less than 3)";
 	titleLookUp["Pstatus"] = "Parents together or apart";
 	titleLookUp["Medu"] = "Mother's education";
 	titleLookUp["Fedu"] = "Father's education";
@@ -36,8 +36,8 @@
 	titleLookUp["Fjob"] = "Father's job";
 	titleLookUp["reason"] = "Reason for school choice";
 	titleLookUp["guardian"] = "Primary guardian";
-	titleLookUp["traveltime"] = "Traveltime to school";
-	titleLookUp["studytime"] = "Weekly studytime";
+	titleLookUp["traveltime"] = "Traveltime to school (hours)";
+	titleLookUp["studytime"] = "Weekly studytime (hours)";
 	titleLookUp["failures"] = "Number of failed classes";
 	titleLookUp["schoolsup"] = "Extra educational support";
 	titleLookUp["famsup"] = "Family educational support";
