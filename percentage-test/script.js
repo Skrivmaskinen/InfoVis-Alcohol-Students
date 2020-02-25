@@ -230,6 +230,7 @@
 					.on('click', function(d,i){
 						if(!filters[category].includes(d.key)){
 							filters[category].push(d.key);
+							if(filters[category].length==sumData.length) filters[category] = [];
 						} else {
 							filters[category].pop(d.key);
 						}
@@ -305,6 +306,8 @@
 					.on('click', function(d,i){
 						if(!filters[category].includes(d.key)){
 							filters[category].push(d.key);
+							if(filters[category].length==sumData.length) filters[category] = [];
+							
 						} else {
 							filters[category].pop(d.key);
 						}
