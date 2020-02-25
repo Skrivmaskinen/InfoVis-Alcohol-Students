@@ -173,7 +173,7 @@
 
 				var presum = 0;
 				//----------------------------------------------------------
-				// 							Create titels
+				// 							Titels
 				//----------------------------------------------------------
 				var titels = svg.append("g")
 					.append("text")
@@ -197,6 +197,9 @@
 				
 				
 				
+				//----------------------------------------------------------
+				// 						Changing big bar
+				//----------------------------------------------------------
 				var bar = svg.append("g");
 
 				bar.selectAll("bar")
@@ -237,6 +240,9 @@
 					});
 
 
+				//----------------------------------------------------------
+				// 						Static small bar
+				//----------------------------------------------------------
 				presum = 0;
 
 				var smallBar = svg.append("g");
@@ -244,7 +250,12 @@
 				smallBar.selectAll("bar")
 					.data(sumData)
 					.enter().append("rect")
-					.style("fill", function (d, i) { return colorbrewer.Pastel1[Math.max(3, Math.min(9, sumData.length))][i % 9] })
+					.style("fill", function (d, i) { 
+						if(filters[category].length > 0 && filters[category].includes(d.key))
+							return colorbrewer.Set1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9];
+						else
+							return colorbrewer.Pastel1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9];
+					})
 					.attr("y", xStart + barWidth)
 					.attr("height", sideBarWidth)
 					.attr("x", function (d, i) { return y(presum += d.value) })
@@ -263,6 +274,9 @@
 						tooltip.selectAll("text").attr("x", widthText / 2);
 					});
 
+				//----------------------------------------------------------
+				// 						Text inside bars
+				//----------------------------------------------------------
 				presum = 0;
 
 				bar.selectAll("text")
