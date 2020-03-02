@@ -27,6 +27,7 @@
 	}
 
 
+
 	//----------------------------------------------------------
 	// 							Constants
 	//----------------------------------------------------------
@@ -188,7 +189,7 @@
 					.domain([0,1])
 					.range([width/2, 0])
 
-				var presum = 0;
+				
 				//----------------------------------------------------------
 				// 							Titels
 				//----------------------------------------------------------
@@ -212,13 +213,75 @@
 						.attr("width", width/2 + backborderwidth*2)
 				}
 				
+				function dataDiffFromKey(key )
+				{
+			 		let startValue = sumData[getIndexByKey(sumData, key)].value;
+			 		let changedValue =  sumFilteredData[getIndexByKey(sumFilteredData, key)].value
+
+					let diff = changedValue/startValue; 
+
+					return diff.toFixed(2);
 				
+				}
+				function productToSymbol( product, margin)
+				{
+					if(product > 1 + margin)
+					{
+						return "⯅";
+					}
+					else if(product < 1 - margin)
+					{
+						return "⯆";
+					}
+					else
+					{
+						return "";
+					}
+				}
+				
+				//----------------------------------------------------------
+				// 						Small bar
+				//----------------------------------------------------------
+				var presum = 0;
+
+				var smallBar = svg.append("g");
+				let originalValue = 0;
+
+
+				smallBar.selectAll("bar")
+					.data(sumData)
+					.enter().append("rect")
+					.style("fill", function (d, i) { 
+						if(filters[category].length > 0 && filters[category].includes(d.key))
+							return colorbrewer.Set1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9];
+						else
+							return colorbrewer.Pastel1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9];
+					})
+					.attr("y", xStart + barWidth)
+					.attr("height", sideBarWidth)
+					.attr("x", function (d, i) { return y(presum += d.value) })
+					.attr("width", function (d, i) { return y(1 - d.value) })
+					.on("mouseover", function () { tooltip.style("display", null); })
+					.on("mouseout", function () { tooltip.style("display", "none"); })
+					.on("mousemove", function (d) {
+						var xPosition = d3.mouse(this)[0] - 15;
+						var yPosition = d3.mouse(this)[1] - 25;
+						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+						
+						var num = d.value * 100;
+						var tooltipText = "Unfiltered data " + d.key + ": " + num.toFixed(0) + "% ";
+						tooltip.select("text").text(tooltipText);
+						var widthText = tooltipText.length * 7;
+						tooltip.selectAll("rect").attr("width", widthText);
+						tooltip.selectAll("text").attr("x", widthText / 2);
+					});
+
 				
 				//----------------------------------------------------------
 				// 						Large bar
 				//----------------------------------------------------------
 				var bar = svg.append("g");
-
+				var presum = 0;
 				bar.selectAll("bar")
 					.data(sumFilteredData)
 					.enter().append("rect")
@@ -250,47 +313,13 @@
 						var yPosition = d3.mouse(this)[1] - 25;
 						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
 						var num = d.value * 100;
-						var tooltipText = d.key + ": " + num.toFixed(0) + "%";
+						var tooltipText = d.key + ": " + num.toFixed(0) + "% " + dataDiffFromKey(d.key);
 						tooltip.select("text").text(tooltipText);
 						var widthText = tooltipText.length * 7;
 						tooltip.selectAll("rect").attr("width", widthText);
 						tooltip.selectAll("text").attr("x", widthText/2);
 					});
 
-
-				//----------------------------------------------------------
-				// 						Small bar
-				//----------------------------------------------------------
-				presum = 0;
-
-				var smallBar = svg.append("g");
-
-				smallBar.selectAll("bar")
-					.data(sumData)
-					.enter().append("rect")
-					.style("fill", function (d, i) { 
-						if(filters[category].length > 0 && filters[category].includes(d.key))
-							return colorbrewer.Set1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9];
-						else
-							return colorbrewer.Pastel1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9];
-					})
-					.attr("y", xStart + barWidth)
-					.attr("height", sideBarWidth)
-					.attr("x", function (d, i) { return y(presum += d.value) })
-					.attr("width", function (d, i) { return y(1 - d.value) })
-					.on("mouseover", function () { tooltip.style("display", null); })
-					.on("mouseout", function () { tooltip.style("display", "none"); })
-					.on("mousemove", function (d) {
-						var xPosition = d3.mouse(this)[0] - 15;
-						var yPosition = d3.mouse(this)[1] - 25;
-						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
-						var num = d.value * 100;
-						var tooltipText = "Unfiltered data " + d.key + ": " + num.toFixed(0) + "%";
-						tooltip.select("text").text(tooltipText);
-						var widthText = tooltipText.length * 7;
-						tooltip.selectAll("rect").attr("width", widthText);
-						tooltip.selectAll("text").attr("x", widthText / 2);
-					});
 
 				//----------------------------------------------------------
 				// 						Text inside bars
@@ -301,7 +330,7 @@
 					.data(sumFilteredData)
 					.enter()
 					.append("text")
-					.text(function(d){ return d.value > 0.05 ? trim(d.key) : ""})
+					.text(function(d){ return (d.value > 0.05 ? trim(d.key) + productToSymbol(dataDiffFromKey(d.key), 0.1): "")})
 					.attr("y", xStart + barWidth/2)
 					.attr("x", function(d, i) { presum += d.value; return y(presum - d.value/2)+5 })
 					.attr("text-anchor", "middle")
@@ -327,7 +356,7 @@
 						var yPosition = d3.mouse(this)[1] - 25;
 						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
 						var num = d.value * 100;
-						var tooltipText = d.key + ": " + num.toFixed(0) + "%";
+						var tooltipText = d.key + ": " + num.toFixed(0) + "% ";
 						tooltip.select("text").text(tooltipText);
 						var widthText = tooltipText.length * 7;
 						tooltip.selectAll("rect").attr("width", widthText);
