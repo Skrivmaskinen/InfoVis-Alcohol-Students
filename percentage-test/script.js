@@ -1,6 +1,37 @@
 
+
+	function getIndexByKey(list, keyName)
+	{
+		for(let i = 0; i < list.length; ++i)
+		{
+			if(list[i].key === keyName)
+			{
+				/*
+				// Swap 1 and 0 to make F red and M blue. 
+				// Should probably be implemented with a more exact solution.
+				if(i === 1)
+				{
+					return 0;
+				}
+				if(i === 0)
+				{
+					return 1;
+				}
+				*/
+
+				return i;
+			}
+		}
+		console.log("ERROR: could not find index!");
+		return -1;
+	}
+
+
+	//----------------------------------------------------------
+	// 							Constants
+	//----------------------------------------------------------
     // set the dimensions and margins of the graph
-    var margin = {top: 100, right: 100, bottom: 10, left: 10},
+    const margin = {top: 100, right: 100, bottom: 10, left: 10},
     width = window.innerWidth - margin.left - margin.right,
     height = 6000 - margin.top - margin.bottom;
 
@@ -14,12 +45,15 @@
     "translate(" + margin.left + "," + margin.top + ")");
 
 
-	var barWidth = 50;
-	var sideBarWidth = 20;
-	var barSpace = 70;
-	var barTextSize = "26px";
-	var MAXTEXT = 6;
+	const barWidth = 50;
+	const sideBarWidth = 20;
+	const barSpace = 70;
+	const barTextSize = "26px";
+	const MAXTEXT = 6;
 
+	//----------------------------------------------------------
+	// 						Titels
+	//----------------------------------------------------------
 	let titleLookUp = [];
 	//school,sex,age,address,famsize,Pstatus,Medu,Fedu,Mjob,Fjob,reason,guardian,traveltime,studytime,failures,schoolsup,famsup,paid,activities,nursery,
 	// higher,internet,romantic,famrel,freetime,goout,Dalc,Walc,health,absences,G1,G2,G3
@@ -60,6 +94,9 @@
 	
 			
 
+	//----------------------------------------------------------
+	// 						Data
+	//----------------------------------------------------------
 	
 
     // Parse the Data
@@ -73,10 +110,6 @@
 			filters[category] = [];
 		});
 		
-
-
-
-
 		function filterCheck(d, cat = null){
 			var include = true;
 			dimensions.forEach(function(category){
@@ -97,9 +130,9 @@
 		}
 
 
-
-		
-
+		//----------------------------------------------------------
+		// 						Draw
+		//----------------------------------------------------------
 		drawBars();
 
 		function drawBars(){
@@ -107,6 +140,7 @@
 			svg.selectAll("g").remove();
 
 
+			// For each dimension, draw the following:
 			var dim = -1;
 			dimensions.forEach(function(category){
 				dim++;
@@ -153,34 +187,6 @@
 				var y = d3.scaleLinear()
 					.domain([0,1])
 					.range([width/2, 0])
-		
-
-
-				function getIndexByKey(list, keyName)
-				{
-					for(let i = 0; i < list.length; ++i)
-					{
-						if(list[i].key === keyName)
-						{
-							/*
-							// Swap 1 and 0 to make F red and M blue. 
-							// Should probably be implemented with a more exact solution.
-							if(i === 1)
-							{
-								return 0;
-							}
-							if(i === 0)
-							{
-								return 1;
-							}
-							*/
-
-							return i;
-						}
-					}
-					console.log("ERROR: could not find index!");
-					return -1;
-				}
 
 				var presum = 0;
 				//----------------------------------------------------------
@@ -209,7 +215,7 @@
 				
 				
 				//----------------------------------------------------------
-				// 						Changing big bar
+				// 						Large bar
 				//----------------------------------------------------------
 				var bar = svg.append("g");
 
@@ -253,7 +259,7 @@
 
 
 				//----------------------------------------------------------
-				// 						Static small bar
+				// 						Small bar
 				//----------------------------------------------------------
 				presum = 0;
 
@@ -328,13 +334,9 @@
 						tooltip.selectAll("text").attr("x", widthText / 2);
 					});
 
-		
 				function trim(text){
 					return text.length > MAXTEXT ? text.substring(0, MAXTEXT-1) + "-" : text;
-				}
-
-
-				
+				}				
 			});
 
 			var selectedStudents = data.filter(function (d) { return filterCheck(d) }).length;
