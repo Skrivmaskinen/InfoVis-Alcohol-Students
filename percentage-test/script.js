@@ -93,7 +93,44 @@
 	titleLookUp["G2"] = "Grade second period";
 	titleLookUp["G3"] = "Final grade";
 	
-			
+	//----------------------------------------------------------
+	// 						Titels
+	//----------------------------------------------------------
+	let keyLookUp = [];			
+	keyLookUp["GP"] = "Gabriel Pereira";			
+	keyLookUp["MS"] = "Mousinho da Silveira";			
+	keyLookUp["F"] = "Female";			
+	keyLookUp["M"] = "Male";			
+	keyLookUp["U"] = "Urban";			
+	keyLookUp["R"] = "Rural";			
+	keyLookUp["LE3"] = "<=3";			
+	keyLookUp["GT3"] = ">3";			
+	keyLookUp["T"] = "Together";			
+	keyLookUp["A"] = "Apart";			
+	keyLookUp["yes"] = "Yes";			
+	keyLookUp["no"] = "No";			
+	keyLookUp["teacher"] = "Teacher";			
+	keyLookUp["health"] = "Health-care";			
+	keyLookUp["services"] = "Civil-services";			
+	keyLookUp["at_home"] = "Stay-at-home";		
+	keyLookUp["other"] = "Other";		
+	keyLookUp["home"] = "Close to home";		
+	keyLookUp["reputation"] = "Reputation";		
+	keyLookUp["mother"] = "Mother";	
+	keyLookUp["father"] = "Father";	
+	keyLookUp["course"] = "School courses";
+
+	function getKeyName (key)
+	{
+		if(isNaN(key))
+		{
+			return keyLookUp[key];
+		}
+		else
+		{
+			return key;
+		}
+	}
 
 	//----------------------------------------------------------
 	// 						Data
@@ -216,7 +253,7 @@
 				function dataDiffFromKey(key )
 				{
 			 		let startValue = sumData[getIndexByKey(sumData, key)].value;
-			 		let changedValue =  sumFilteredData[getIndexByKey(sumFilteredData, key)].value
+			 		let changedValue =  sumFilteredData[getIndexByKey(sumFilteredData, key)].value;
 
 					let diff = changedValue/startValue; 
 
@@ -269,7 +306,7 @@
 						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
 						
 						var num = d.value * 100;
-						var tooltipText = "Unfiltered data " + d.key + ": " + num.toFixed(0) + "% ";
+						var tooltipText = "Unfiltered data " + titleLookUp[d.key] + ": " + num.toFixed(0) + "% ";
 						tooltip.select("text").text(tooltipText);
 						var widthText = tooltipText.length * 7;
 						tooltip.selectAll("rect").attr("width", widthText);
@@ -313,7 +350,7 @@
 						var yPosition = d3.mouse(this)[1] - 25;
 						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
 						var num = d.value * 100;
-						var tooltipText = d.key + ": " + num.toFixed(0) + "% " + dataDiffFromKey(d.key);
+						var tooltipText = getKeyName(d.key) + ": " + num.toFixed(0) + "% " + dataDiffFromKey(d.key);
 						tooltip.select("text").text(tooltipText);
 						var widthText = tooltipText.length * 7;
 						tooltip.selectAll("rect").attr("width", widthText);
@@ -330,7 +367,7 @@
 					.data(sumFilteredData)
 					.enter()
 					.append("text")
-					.text(function(d){ return (d.value > 0.05 ? trim(d.key) + productToSymbol(dataDiffFromKey(d.key), 0.1): "")})
+					.text(function(d){ return (d.value > 0.05 ? trim(d.key, getKeyName( d.key)) + productToSymbol(dataDiffFromKey(d.key), 0.1): "")})
 					.attr("y", xStart + barWidth/2)
 					.attr("x", function(d, i) { presum += d.value; return y(presum - d.value/2)+5 })
 					.attr("text-anchor", "middle")
@@ -356,15 +393,19 @@
 						var yPosition = d3.mouse(this)[1] - 25;
 						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
 						var num = d.value * 100;
-						var tooltipText = d.key + ": " + num.toFixed(0) + "% ";
+						var tooltipText = getKeyName(d.key) + ": " + num.toFixed(0) + "% ";
 						tooltip.select("text").text(tooltipText);
 						var widthText = tooltipText.length * 7;
 						tooltip.selectAll("rect").attr("width", widthText);
 						tooltip.selectAll("text").attr("x", widthText / 2);
 					});
 
-				function trim(text){
-					return text.length > MAXTEXT ? text.substring(0, MAXTEXT-1) + "-" : text;
+				function trim(key, text){
+
+					let subBarWidth = barSpace * sumFilteredData[getIndexByKey(sumFilteredData, key)].value;
+					let countCharacters =  (subBarWidth).toFixed(0);
+					
+					return text.length > countCharacters ? text.substring(0, countCharacters -1) + "-" : text;
 				}				
 			});
 
@@ -412,7 +453,7 @@
 						.style("text-anchor", "start")
 						.attr("font-size", "20px")
 						.attr("font-weight", "bold")
-						.text(category + " : " + filters[category].toString())
+						.text(titleLookUp[category] + " : " + getKeyName(filters[category].toString()))
 						offset+= 20;
 				}
 			});
