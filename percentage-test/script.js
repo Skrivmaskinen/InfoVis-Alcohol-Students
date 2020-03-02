@@ -350,7 +350,7 @@
 						var yPosition = d3.mouse(this)[1] - 25;
 						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
 						var num = d.value * 100;
-						var tooltipText = getKeyName(d.key) + ": " + num.toFixed(0) + "% " + dataDiffFromKey(d.key);
+						var tooltipText = getKeyName(d.key) + ": " + num.toFixed(0) + "% " + dataDiffFromKey(d.key) + " of unfiltered";
 						tooltip.select("text").text(tooltipText);
 						var widthText = tooltipText.length * 7;
 						tooltip.selectAll("rect").attr("width", widthText);
@@ -393,7 +393,7 @@
 						var yPosition = d3.mouse(this)[1] - 25;
 						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
 						var num = d.value * 100;
-						var tooltipText = getKeyName(d.key) + ": " + num.toFixed(0) + "% ";
+						var tooltipText = getKeyName(d.key) + ": " + num.toFixed(0) + "% " + dataDiffFromKey(d.key) + " of unfiltered";
 						tooltip.select("text").text(tooltipText);
 						var widthText = tooltipText.length * 7;
 						tooltip.selectAll("rect").attr("width", widthText);
@@ -453,10 +453,27 @@
 						.style("text-anchor", "start")
 						.attr("font-size", "20px")
 						.attr("font-weight", "bold")
-						.text(titleLookUp[category] + " : " + getKeyName(filters[category].toString()))
+						.text(titleLookUp[category] + " : " + keyNamesOfFilters(filters[category]));// getKeyName(filters[category].toString()))
 						offset+= 20;
 				}
 			});
+			function keyNamesOfFilters(filters)
+			{
+				filters.sort();
+				console.log(filters);
+				let outputString = "";
+				for(let i = 0; i < filters.length; ++i)
+				{
+					console.log(getKeyName(filters[i]));
+					outputString = outputString + getKeyName(filters[i]);
+					if(i + 1 < filters.length)
+					{
+						outputString = outputString + ", "
+					}
+				}
+
+				return outputString;
+			}
 
 			// Prep the tooltip bits, initial display is hidden
 			var tooltip = svg.append("g")
