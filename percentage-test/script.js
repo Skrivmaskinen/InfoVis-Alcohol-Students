@@ -236,10 +236,11 @@
 					.sort(function(x, y){
 						return nanCategory ? d3.ascending(x.key, y.key) : d3.ascending(+x.key, +y.key);
 					})
+					.reverse()
 			
-				var sumData = sumDataTotal[category];
+				var sumData = sumDataTotal[category].reverse();
 
-
+				
 				
 
 				var presum = 0;
