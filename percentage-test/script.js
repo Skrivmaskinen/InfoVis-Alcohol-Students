@@ -39,13 +39,23 @@
     // append the svg object to the body of the page
     var svg = d3.select("#my_dataviz")
     .append("svg")
-    .attr("width", width + margin.left + margin.right)
+    .attr("width", width/2 + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform",
     "translate(" + margin.left + "," + margin.top + ")");
 
+	var rightsvg = d3.select("#infobar")
+    .append("svg")
+    .attr("width", width/2 + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform",
+    "translate(" + margin.left + "," + margin.top + ")");
 
+	var y = d3.scaleLinear()
+		.domain([0,1])
+		.range([width/2, 0])
 	const barWidth = 50;
 	const sideBarWidth = 20;
 	const barSpace = 70;
@@ -148,6 +158,25 @@
 			filters[category] = [];
 		});
 		
+		var perEntry = 1/data.length;
+
+		var sumDataTotal = [];
+		dimensions.forEach(function(category){
+			var nanCategory = isNaN(data[0][category]);
+			sumDataTotal[category] = d3.nest()
+				.key(function(d) { return d[category];})
+				.rollup(function(d) { 
+					return d3.sum(d, function(g) {return perEntry }) 
+				})
+				.entries(data)
+				.sort(function(x, y){
+					return nanCategory ? d3.ascending(x.key, y.key) : d3.ascending(+x.key, +y.key);
+				})
+		});
+		
+		console.log(sumDataTotal);
+					
+
 		function filterCheck(d, cat = null){
 			var include = true;
 			dimensions.forEach(function(category){
@@ -191,13 +220,12 @@
 				}
 
 				var perEntryFiltered = 1/datafiltered.length;
-				var perEntry = 1/data.length;
 			
 				var xStart = dim*(barWidth+barSpace); 
 
 				var category = dimensions[dim];
 
-				var nanCategory = isNaN(datafiltered[0][category]);
+				var nanCategory = isNaN(data[0][category]);
 
 				var sumFilteredData = d3.nest()
 					.key(function(d) { return d[category];})
@@ -209,24 +237,12 @@
 						return nanCategory ? d3.ascending(x.key, y.key) : d3.ascending(+x.key, +y.key);
 					})
 			
-				var sumData = d3.nest()
-					.key(function(d) { return d[category];})
-					.rollup(function(d) { 
-						return d3.sum(d, function(g) {return perEntry }) 
-					})
-					.entries(data)
-					.sort(function(x, y){
-						return nanCategory ? d3.ascending(x.key, y.key) : d3.ascending(+x.key, +y.key);
-					})
-					sumData = sumData.reverse();
-					sumFilteredData = sumFilteredData.reverse();
+				var sumData = sumDataTotal[category];
 
-
-				var y = d3.scaleLinear()
-					.domain([0,1])
-					.range([width/2, 0])
 
 				
+
+				var presum = 0;
 				//----------------------------------------------------------
 				// 							Titels
 				//----------------------------------------------------------
@@ -413,25 +429,34 @@
 			var totalStudents = data.length;
 
 			var infoBox = [];
-			infoBox.x = width/2 + 40;
+			infoBox.x = 20;
 			infoBox.y = 0;
 			infoBox.width = width/2-20;
+			infoBox.height = 200;
 			infoBox.padding = 20;
 
+			var psetsBox = [];
+			psetsBox.x = 20;
+			psetsBox.y = infoBox.y + infoBox.height+20;
+			psetsBox.width = width/2-20;
+			psetsBox.height = 300;
 
-			var background = svg.append("g");
-					background.append("rect")
-						.style("fill","#FAFAFA")
-						.style("stroke", "#DDDDDD")
-						.style("stroke-width", 6)
-						.attr("rx", 20)
-						.attr("ry", 20)
-						.attr("y", infoBox.y)
-						.attr("height", 400)
-						.attr("x", infoBox.x)
-						.attr("width", infoBox.width)
+			rightsvg.selectAll("g").remove();
+			
 
-			var textcontent = svg.append("g")
+			var background = rightsvg.append("g");
+			background.append("rect")
+				.style("fill","#FAFAFA")
+				.style("stroke", "#DDDDDD")
+				.style("stroke-width", 6)
+				.attr("rx", 20)
+				.attr("ry", 20)
+				.attr("y", infoBox.y)
+				.attr("height", infoBox.height)
+				.attr("x", infoBox.x)
+				.attr("width", infoBox.width)
+
+			var textcontent = rightsvg.append("g")
 				.append("text")
 				.attr("x", infoBox.x + infoBox.padding)
 				.attr("y", infoBox.y + infoBox.padding)
@@ -445,7 +470,7 @@
 			dimensions.forEach(function(category){
 				if(filters[category].length > 0){
 					
-					var a = svg.append("g")
+					var a = rightsvg.append("g")
 						.append("text")
 						.attr("x", infoBox.x + infoBox.padding)
 						.attr("y", infoBox.y + infoBox.padding + offset)
@@ -475,6 +500,138 @@
 				return outputString;
 			}
 
+
+			//PSETS
+			var selectedDims = ["school", "sex", "age"];
+
+			var parsetsTree = [];
+			recursiveDefineTree(parsetsTree, selectedDims);
+
+			function recursiveDefineTree(node, categorylist){
+				if(categorylist.length == 0) return;
+				var cat = categorylist[0];
+				var remainingCats = categorylist.slice(1,categorylist.length);
+				var sumData = sumDataTotal[cat];
+				sumData.forEach(function(sd){
+					node.fraction = 0;
+					node[sd.key] = [];
+					if(remainingCats.length>0){
+						
+						recursiveDefineTree(node[sd.key], remainingCats);
+					}
+					else
+						node[sd.key].fraction = 0;
+				});
+				return;
+			}
+
+
+			data.forEach(function(d){
+				var temp = parsetsTree;
+				selectedDims.forEach(function(sd){
+					temp[d[sd]].fraction += perEntry;
+					temp = temp[d[sd]];
+				});
+			});
+
+			console.log(parsetsTree);
+
+			var yPset = d3.scaleLinear()
+				.domain([0,1])
+				.range([psetsBox.y, psetsBox.y + psetsBox.height])
+
+			var xPset = d3.scaleLinear()
+				.domain([1,0])
+				.range([psetsBox.x, psetsBox.x + psetsBox.width])
+
+
+			drawPSet(parsetsTree, selectedDims);
+
+			function drawPSet(tree, selected_dims){
+				var cat = selected_dims[0];
+				var remainingCats = selected_dims.slice(1,selected_dims.length);
+				var sumData = sumDataTotal[cat];
+				var xStart = 0;
+				sumData.forEach(function(sd){
+					drawRecursivePSet(parsetsTree[sd.key], xStart, 0, sd.value, remainingCats, selected_dims.length, colorbrewer.Set1[9][getIndexByKey(sumData, sd.key)%9]);
+					xStart += sd.value;
+				});
+			}
+
+			function drawRecursivePSet(node, xStart, yStart, parentwidth, categorylist, totalcats, color){
+				
+				if(categorylist.length == 0) return;
+				var cat = categorylist[0];
+				var remainingCats = categorylist.slice(1,categorylist.length);
+				var sumData = sumDataTotal[cat];
+				
+
+				sumData.forEach(function(sd){
+					
+					var cur_width = node.fraction * parentwidth;
+					var poly = [{"x":xStart, "y":yStart},
+						{"x":xStart+cur_width,"y":yStart},
+						{"x":xStart+cur_width,"y":yStart+1/totalcats},
+						{"x":xStart,"y":yStart+1/totalcats}];
+
+					rightsvg.append("g").selectAll("polygon")
+					.data([poly])
+					.enter().append("polygon")
+					.attr("points",function(d) { 
+						return d.map(function(d) {
+							return [xPset(d.x),yPset(d.y)].join(",");
+						}).join(" ");
+					})
+					.style("fill", color)
+					.style("opacity", 0.5)
+					.on("mouseover", function () { tooltip2.style("display", null); })
+					.on("mouseout", function () { tooltip2.style("display", "none"); })
+					.on("mousemove", function (d) {
+						var xPosition = d3.mouse(this)[0] - 15;
+						var yPosition = d3.mouse(this)[1] - 25;
+						tooltip2.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+						var num = 1;
+						var tooltipText = sd.key + ": " + num.toFixed(0) + "%";
+						tooltip2.select("text").text(tooltipText);
+						var widthText = tooltipText.length * 7;
+						tooltip2.selectAll("rect").attr("width", widthText);
+						tooltip2.selectAll("text").attr("x", widthText / 2);
+					});
+
+					drawRecursivePSet(node[sd.key], poly[3].x, yStart + 1/totalcats, sd.value*parentwidth, remainingCats, totalcats, color);
+
+					xStart+= node.fraction*parentwidth;
+				});
+
+			}
+
+			//draw "axis" for psets
+			var yStart = 0;
+			selectedDims.forEach(function(dim){
+				var xStart = 0;
+				sumDataTotal[dim].forEach(function(sd){
+					var axis = rightsvg.append("g");
+					
+					axis.append("path")
+						.attr("d", d3.line()([[xPset(xStart)-2, yPset(yStart)], [xPset(xStart+sd.value)+2, yPset(yStart)]]))
+						.attr("stroke", "black")
+						.style("stroke-width", 6)
+					axis.append("text")
+						.attr("x", xPset(xStart+sd.value))
+						.attr("y", yPset(yStart))
+						.attr("dy", "1.2em")
+						.attr("font-size", "12px")
+						.attr("font-weight", "bold")
+						
+						.text(sd.key)
+					xStart += sd.value;
+				});
+				yStart += 1/selectedDims.length;
+			});
+			
+			
+			
+
 			// Prep the tooltip bits, initial display is hidden
 			var tooltip = svg.append("g")
 				.attr("class", "tooltip")
@@ -492,6 +649,49 @@
 				.style("text-anchor", "middle")
 				.attr("font-size", "12px")
 				.attr("font-weight", "bold");
+
+				var tooltip2 = rightsvg.append("g")
+				.attr("class", "tooltip")
+				.style("display", "none");
+
+			tooltip2.append("rect")
+				.attr("width", 30)
+				.attr("height", 20)
+				.attr("fill", "white")
+				.style("opacity", 0.7);
+
+			tooltip2.append("text")
+				.attr("x", 15)
+				.attr("dy", "1.2em")
+				.style("text-anchor", "middle")
+				.attr("font-size", "12px")
+				.attr("font-weight", "bold");
 		}
 
     });
+
+	function getIndexByKey(list, keyName)
+				{
+					for(let i = 0; i < list.length; ++i)
+					{
+						if(list[i].key === keyName)
+						{
+							/*
+							// Swap 1 and 0 to make F red and M blue. 
+							// Should probably be implemented with a more exact solution.
+							if(i === 1)
+							{
+								return 0;
+							}
+							if(i === 0)
+							{
+								return 1;
+							}
+							*/
+
+							return i;
+						}
+					}
+					console.log("ERROR: could not find index!");
+					return -1;
+				}
