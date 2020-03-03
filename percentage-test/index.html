@@ -1,13 +1,43 @@
 ﻿<!DOCTYPE html>
 <meta charset="utf-8">
 
-<!-- Load d3.js -->
-<script src="https://d3js.org/d3.v4.js"></script>
-<script src="https://d3js.org/d3-axis.v1.min.js"></script>
-<script src="https://d3js.org/colorbrewer.v1.min.js"></script>
-<!-- Create a div where the graph will take place -->
-<div id="my_dataviz" style="width: 50%; float: left;" ></div>
-<div id="infobar" style="width: 50%; float:right; position:fixed; right:0;" ></div>
-<script src="script.js"></script>
-<!--<body onload="script.js">
--->
+<head>
+	<!-- Load d3.js -->
+	<script src="https://d3js.org/d3.v4.js"></script>
+	<script src="https://d3js.org/d3-axis.v1.min.js"></script>
+	<script src="https://d3js.org/colorbrewer.v1.min.js"></script>
+
+</head>
+<body style = "width: 50%;margin-left: 1em">
+	<h1 style = "
+	font-size: 4em;
+	font-family: Georgia; 
+	margin-bottom: 0;
+	">
+		Student Alcohol Consumption
+	</h1>
+	<!-- Create a div where the graph will take place -->
+	<p style = "
+	font-size: 1em;
+	font-family: Georgia; 
+	margin-bottom: 0;
+	"> "The data were obtained in a survey of students math and portuguese language courses in secondary school. It contains a lot of interesting social, gender and study information about students." - <a href="https://archive.ics.uci.edu/ml/index.php"> UCI Machine Learning </a>.
+	
+	The data set can be found <a href="https://www.kaggle.com/uciml/student-alcohol-consumption?fbclid=IwAR0Bs3Z_RR6ASm6bZlUNKZKu_plkNgq6PPuumAoLcufZI0WxSCd5dbiE4ro">here</a>.
+
+	</p>
+	<p style = "
+	font-size: 1em;
+	font-family: Georgia; 
+	margin-bottom: 0;
+	">
+		Click on bars to filter the data by those answears.  An uppward arrow (⯅) indicates correlation. A downward arrow (⯆) indicates inverse correlation. 
+	</p>
+
+
+	<div id="my_dataviz" style="width: 50%; float: left;" ></div>
+	<div id="infobar" style="width: 50%; float:right; position:fixed; right:0; top: 0" ></div>
+	<script src="script.js"></script>
+	<!--<body onload="script.js">
+	-->
+</body>
