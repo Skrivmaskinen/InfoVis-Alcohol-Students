@@ -170,7 +170,7 @@
 				})
 				.entries(data)
 				.sort(function(x, y){
-					return nanCategory ? d3.ascending(x.key, y.key) : d3.ascending(+x.key, +y.key);
+					return nanCategory ? d3.descending(x.key, y.key) : d3.descending(+x.key, +y.key);
 				})
 		});
 		
@@ -234,11 +234,11 @@
 					})
 					.entries(datafiltered)
 					.sort(function(x, y){
-						return nanCategory ? d3.ascending(x.key, y.key) : d3.ascending(+x.key, +y.key);
+						return nanCategory ? d3.descending(x.key, y.key) : d3.descending(+x.key, +y.key);
 					})
-					.reverse()
+					
 			
-				var sumData = sumDataTotal[category].reverse();
+				var sumData = sumDataTotal[category]
 
 				
 				
@@ -554,6 +554,7 @@
 				var sumData = sumDataTotal[cat];
 				var xStart = 0;
 				sumData.forEach(function(sd){
+
 					drawRecursivePSet(parsetsTree[sd.key], xStart, 0, sd.value, remainingCats, selected_dims.length, colorbrewer.Set1[9][getIndexByKey(sumData, sd.key)%9]);
 					xStart += sd.value;
 				});
@@ -671,28 +672,4 @@
 
     });
 
-	function getIndexByKey(list, keyName)
-				{
-					for(let i = 0; i < list.length; ++i)
-					{
-						if(list[i].key === keyName)
-						{
-							/*
-							// Swap 1 and 0 to make F red and M blue. 
-							// Should probably be implemented with a more exact solution.
-							if(i === 1)
-							{
-								return 0;
-							}
-							if(i === 0)
-							{
-								return 1;
-							}
-							*/
 
-							return i;
-						}
-					}
-					console.log("ERROR: could not find index!");
-					return -1;
-				}
