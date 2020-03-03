@@ -23,7 +23,77 @@
 			}
 		}
 		console.log("ERROR: could not find index!");
+		console.log("keyName: " + keyName)
+		console.log("list")
+		console.log(list)
 		return -1;
+	}
+
+			let bad_grade = 10;
+			let medium_grade = 15;
+	function bucketfyData(data, bucketSpan)
+	{
+		//console.log(data[dimension]);
+		data.forEach(function(point){
+			let numberfy = parseInt(point.absences);
+
+			if(numberfy === 0)
+			{
+				point.absences = "a_absences";
+			}
+			else if(numberfy < 5)
+			{
+				point.absences = "b_absences"
+			}
+			else
+			{
+				point.absences = "c_absences"
+			}
+
+
+			 numberfy = parseInt(point.G1);
+
+			if(numberfy < bad_grade)
+			{
+				point.G1 = "a_G";
+			}
+			else if(numberfy < 13)
+			{
+				point.G1 = "b_G";
+			}
+			else
+			{
+				point.G1 = "c_G";
+			} 
+			numberfy = parseInt(point.G2);
+
+			if(numberfy < bad_grade)
+			{
+				point.G2 = "a_G";
+			}
+			else if(numberfy < medium_grade)
+			{
+				point.G2 = "b_G";
+			}
+			else
+			{
+				point.G2 = "c_G";
+			} 
+			numberfy = parseInt(point.G3);
+
+			if(numberfy < bad_grade)
+			{
+				point.G3 = "a_G";
+			}
+			else if(numberfy < medium_grade)
+			{
+				point.G3 = "b_G";
+			}
+			else
+			{
+				point.G3 = "c_G";
+			}
+		})
 	}
 
 
@@ -131,6 +201,15 @@
 	keyLookUp["father"] = "Father";	
 	keyLookUp["course"] = "School courses";
 
+	keyLookUp["a_absences"] = "[0]";		
+	keyLookUp["b_absences"] = "]0, 5[";		
+	keyLookUp["c_absences"] = "[5, 32[";
+
+	keyLookUp["a_G"] = "[0, " + bad_grade + "]";		
+	keyLookUp["b_G"] = "]" + bad_grade+ ", "+ medium_grade +"[";		
+	keyLookUp["c_G"] = "[" + medium_grade + " , 20[";
+
+
 	function getKeyName (key)
 	{
 		if(isNaN(key))
@@ -150,8 +229,12 @@
 
     // Parse the Data
     d3.csv("../student-por.csv", function(data) {
+    	console.log("Data:")
         console.log(data);
-        // Extract the list of dimensions we want to keep in the plot.!isNaN(data[0][d]) Here I keep all except the column called Species
+
+        bucketfyData(data, 5);
+
+        // Extract the list of dimensions we want to keep in the plot.!isNaN(data[0][d]) 
         dimensions = d3.keys(data[0]).filter(function (d) { return true })
 
 		var filters = [];
@@ -174,10 +257,13 @@
 					return nanCategory ? d3.descending(x.key, y.key) : d3.descending(+x.key, +y.key);
 				})
 		});
-		
-		console.log(sumDataTotal);
-					
+		console.log("sumDataTotal.absences:")
+		console.log(sumDataTotal.absences);
 
+		//sumDataTotal.absences = histofyList(sumDataTotal.absences, 5);
+
+		console.log("sumDataTotal.absences (changed?):")
+		console.log(sumDataTotal.absences);
 		function filterCheck(d, cat = null){
 			var include = true;
 			dimensions.forEach(function(category){
@@ -307,10 +393,30 @@
 					.data(sumData)
 					.enter().append("rect")
 					.style("fill", function (d, i) { 
-						if(filters[category].length > 0 && filters[category].includes(d.key))
-							return colorbrewer.Set1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9];
+						// categorical
+
+							if(filters[category].length > 0 && filters[category].includes(d.key))
+								return colorbrewer.Set1[9][getIndexByKey(sumData, d.key)%9];
+							else
+								return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9];
+							/*
+						if(category === "Mjob")
+						{
+							
+							if(filters[category].length > 0 && filters[category].includes(d.key))
+								return colorbrewer.Set1[9][getIndexByKey(sumData, d.key)%9];
+							else
+								return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9];
+						}
 						else
-							return colorbrewer.Pastel1[Math.max(3, Math.min(9, sumData.length))][getIndexByKey(sumData, d.key)%9];
+						{
+							// numerical
+							if(filters[category].length > 0 && filters[category].includes(d.key))
+								return colorbrewer.YlOrRd[9][getIndexByKey(sumData, d.key)%9];
+							else
+								return colorbrewer.Greys[9][getIndexByKey(sumData, d.key)%9];;
+						}*/
+
 					})
 					.attr("y", xStart + barWidth)
 					.attr("height", sideBarWidth)
@@ -342,6 +448,25 @@
 					.enter().append("rect")
 					.attr("class", "bigBar")
 					.style("fill", function(d, i) {
+						// categorical
+						/*if(category === "Mjob")
+						{
+							// numerical
+							if(filters[category].length > 0 && !filters[category].includes(d.key))
+								return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9];
+							else
+								return colorbrewer.Set1[9][getIndexByKey(sumData, d.key)%9];;
+						}
+						else
+						{
+							// numerical
+							if(filters[category].length > 0 && !filters[category].includes(d.key))
+								return colorbrewer.Greys[9][getIndexByKey(sumData, d.key)%9];
+							else
+								return colorbrewer.YlOrRd[9][getIndexByKey(sumData, d.key)%9];
+						}*/
+
+
 						if(filters[category].length > 0 && !filters[category].includes(d.key))
 							return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9];
 						else
@@ -466,6 +591,10 @@
 				return outputString;
 			}
 
+
+			//----------------------------------------------------------
+			// 						Parallel Sets
+			//----------------------------------------------------------
 
 			//PSETS
 			var selectedDims = ["sex", "romantic", "internet"];
