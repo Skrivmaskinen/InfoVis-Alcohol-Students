@@ -434,7 +434,7 @@
 			infoBox.x = 20;
 			infoBox.y = 0;
 			infoBox.width = width/2-20;
-			infoBox.height = 200;
+			infoBox.height = 300;
 			infoBox.padding = 20;
 
 			var psetsBox = [];
@@ -443,47 +443,11 @@
 			psetsBox.width = width/2-20;
 			psetsBox.height = 300;
 
-			rightsvg.selectAll("g").remove();
+			
+			
 			
 
-			var background = rightsvg.append("g");
-			background.append("rect")
-				.style("fill","#FAFAFA")
-				.style("stroke", "#DDDDDD")
-				.style("stroke-width", 6)
-				.attr("rx", 20)
-				.attr("ry", 20)
-				.attr("y", infoBox.y)
-				.attr("height", infoBox.height)
-				.attr("x", infoBox.x)
-				.attr("width", infoBox.width)
-
-			var textcontent = rightsvg.append("g")
-				.append("text")
-				.attr("x", infoBox.x + infoBox.padding)
-				.attr("y", infoBox.y + infoBox.padding)
-				.attr("dy", "0.5em")
-				.style("text-anchor", "start")
-				.attr("font-size", "26px")
-				.attr("font-weight", "bold")
-				.text("Selections: " + selectedStudents + "/" + totalStudents )
-
-			var offset = 50;
-			dimensions.forEach(function(category){
-				if(filters[category].length > 0){
-					
-					var a = rightsvg.append("g")
-						.append("text")
-						.attr("x", infoBox.x + infoBox.padding)
-						.attr("y", infoBox.y + infoBox.padding + offset)
-						.attr("dy", "0.5em")
-						.style("text-anchor", "start")
-						.attr("font-size", "20px")
-						.attr("font-weight", "bold")
-						.text(titleLookUp[category] + " : " + keyNamesOfFilters(filters[category]));// getKeyName(filters[category].toString()))
-						offset+= 20;
-				}
-			});
+			
 			function keyNamesOfFilters(filters)
 			{
 				filters.sort();
@@ -504,25 +468,31 @@
 
 
 			//PSETS
-			var selectedDims = ["school", "sex", "age"];
+			var selectedDims = ["sex", "romantic", "internet"];
+
+
 
 			var parsetsTree = [];
-			recursiveDefineTree(parsetsTree, selectedDims);
+			recursiveDefineTree(parsetsTree, null, selectedDims);
 
-			function recursiveDefineTree(node, categorylist){
+			function recursiveDefineTree(node, prevnode, categorylist){
 				if(categorylist.length == 0) return;
 				var cat = categorylist[0];
 				var remainingCats = categorylist.slice(1,categorylist.length);
 				var sumData = sumDataTotal[cat];
 				sumData.forEach(function(sd){
 					node.fraction = 0;
+					node.polygon = null;
+					node.parent = prevnode;
 					node[sd.key] = [];
 					if(remainingCats.length>0){
-						
-						recursiveDefineTree(node[sd.key], remainingCats);
+						recursiveDefineTree(node[sd.key], node, remainingCats);
 					}
-					else
+					else{
+						node[sd.key].parent = node;
 						node[sd.key].fraction = 0;
+					}
+						
 				});
 				return;
 			}
@@ -547,22 +517,107 @@
 				.range([psetsBox.x, psetsBox.x + psetsBox.width])
 
 
-			drawPSet(parsetsTree, selectedDims);
+		
+			drawRightSvg();
+
+			function drawRightSvg(){
+				//clear
+				rightsvg.selectAll("g").remove();
+
+				//draw infoBox
+				var background = rightsvg.append("g");
+				background.append("rect")
+					.style("fill","#FAFAFA")
+					.style("stroke", "#DDDDDD")
+					.style("stroke-width", 6)
+					.attr("rx", 20)
+					.attr("ry", 20)
+					.attr("y", infoBox.y)
+					.attr("height", infoBox.height)
+					.attr("x", infoBox.x)
+					.attr("width", infoBox.width)
+
+				var textcontent = rightsvg.append("g")
+					.append("text")
+					.attr("x", infoBox.x + infoBox.padding)
+					.attr("y", infoBox.y + infoBox.padding)
+					.attr("dy", "0.5em")
+					.style("text-anchor", "start")
+					.attr("font-size", "26px")
+					.attr("font-weight", "bold")
+					.text("Selections: " + selectedStudents + "/" + totalStudents )
+
+				var offset = 50;
+				dimensions.forEach(function(category){
+					if(filters[category].length > 0){
+					
+						var a = rightsvg.append("g")
+							.append("text")
+							.attr("x", infoBox.x + infoBox.padding)
+							.attr("y", infoBox.y + infoBox.padding + offset)
+							.attr("dy", "0.5em")
+							.style("text-anchor", "start")
+							.attr("font-size", "20px")
+							.attr("font-weight", "bold")
+							.text(titleLookUp[category] + " : " + keyNamesOfFilters(filters[category]));// getKeyName(filters[category].toString()))
+							offset+= 20;
+					}
+				});
+
+				//draw psets
+				drawPSet(parsetsTree, selectedDims);
+			}
+	
 
 			function drawPSet(tree, selected_dims){
+				var dimstarts = [];
+				selectedDims.forEach(function(cat){
+					var sumData = sumDataTotal[cat];
+					var presum = 0;
+					dimstarts[cat] = [];
+					sumData.forEach(function(sd){
+						dimstarts[cat][sd.key] = presum;
+						presum += sd.value;
+					});
+				});
+				
 				var cat = selected_dims[0];
 				var remainingCats = selected_dims.slice(1,selected_dims.length);
 				var sumData = sumDataTotal[cat];
 				var xStart = 0;
 				sumData.forEach(function(sd){
-
-					drawRecursivePSet(parsetsTree[sd.key], xStart, 0, sd.value, remainingCats, selected_dims.length, colorbrewer.Set1[9][getIndexByKey(sumData, sd.key)%9]);
+					var sd_tiptext =  titleLookUp[cat] + ": " + getKeyName(sd.key);
+					drawRecursivePSet(parsetsTree[sd.key], xStart, 0, sd.value, remainingCats, selected_dims.length, colorbrewer.Set1[9][getIndexByKey(sumData, sd.key)%9], dimstarts, sd_tiptext);
 					xStart += sd.value;
+				});
+
+				//draw "axis" for psets
+				var yStart = 0;
+				selectedDims.forEach(function(dim){
+					var xStart = 0;
+					sumDataTotal[dim].forEach(function(sd){
+						var axis = rightsvg.append("g");
+					
+						axis.append("path")
+							.attr("d", d3.line()([[xPset(xStart)-2, yPset(yStart)], [xPset(xStart+sd.value)+2, yPset(yStart)]]))
+							.attr("stroke", "black")
+							.style("stroke-width", 2)
+							.style("opacity", 0.8)
+						axis.append("text")
+							.attr("x", xPset(xStart+sd.value))
+							.attr("y", yPset(yStart))
+							.attr("dy", "1.2em")
+							.attr("font-size", "12px")
+							.attr("font-weight", "bold")
+						
+							.text(sd.key)
+						xStart += sd.value;
+					});
+					yStart += 1/selectedDims.length;
 				});
 			}
 
-			function drawRecursivePSet(node, xStart, yStart, parentwidth, categorylist, totalcats, color){
-				
+			function drawRecursivePSet(node, xStart, yStart, parentwidth, categorylist, totalcats, color, dimstarts, tooltip_text){
 				if(categorylist.length == 0) return;
 				var cat = categorylist[0];
 				var remainingCats = categorylist.slice(1,categorylist.length);
@@ -571,66 +626,84 @@
 
 				sumData.forEach(function(sd){
 					
-					var cur_width = node.fraction * parentwidth;
+					var sd_tiptext = tooltip_text + " 🠒 " + titleLookUp[cat] + ": " + getKeyName(sd.key);
+
+
+					var cur_width = node[sd.key].fraction;
+					var xEnd = dimstarts[cat][sd.key];
+					dimstarts[cat][sd.key] += node[sd.key].fraction;
 					var poly = [{"x":xStart, "y":yStart},
 						{"x":xStart+cur_width,"y":yStart},
-						{"x":xStart+cur_width,"y":yStart+1/totalcats},
-						{"x":xStart,"y":yStart+1/totalcats}];
+						{"x":xEnd+cur_width,"y":yStart+1/totalcats},
+						{"x":xEnd,"y":yStart+1/totalcats}];
 
-					rightsvg.append("g").selectAll("polygon")
-					.data([poly])
-					.enter().append("polygon")
-					.attr("points",function(d) { 
-						return d.map(function(d) {
-							return [xPset(d.x),yPset(d.y)].join(",");
-						}).join(" ");
-					})
-					.style("fill", color)
-					.style("opacity", 0.5)
-					.on("mouseover", function () { tooltip2.style("display", null); })
-					.on("mouseout", function () { tooltip2.style("display", "none"); })
-					.on("mousemove", function (d) {
-						var xPosition = d3.mouse(this)[0] - 15;
-						var yPosition = d3.mouse(this)[1] - 25;
-						tooltip2.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
-						var num = 1;
-						var tooltipText = sd.key + ": " + num.toFixed(0) + "%";
-						tooltip2.select("text").text(tooltipText);
-						var widthText = tooltipText.length * 7;
-						tooltip2.selectAll("rect").attr("width", widthText);
-						tooltip2.selectAll("text").attr("x", widthText / 2);
-					});
+					var nodepolygon = rightsvg.append("g").selectAll("polygon")
+						.data([poly])
+						.enter().append("polygon");
 
-					drawRecursivePSet(node[sd.key], poly[3].x, yStart + 1/totalcats, sd.value*parentwidth, remainingCats, totalcats, color);
+					node[sd.key].polygon = nodepolygon;
 
-					xStart+= node.fraction*parentwidth;
+					nodepolygon
+						.attr("points",function(d) { 
+							return d.map(function(d) {
+								return [xPset(d.x),yPset(d.y)].join(",");
+							}).join(" ");
+						})
+						.style("fill", color)
+						.style("opacity", 0.5)
+						.on("mouseover", function () { 
+							tooltip2.style("display", null);
+
+							setBranchOpacity(node[sd.key], 1, remainingCats)
+							
+						})
+						.on("mouseout", function () {
+							tooltip2.style("display", "none");
+
+							setBranchOpacity(node[sd.key], 0.5, remainingCats)
+						})
+						.on("mousemove", function (d) {
+							var xPosition = d3.mouse(this)[0] - 15;
+							var yPosition = d3.mouse(this)[1] - 25;
+							tooltip2.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+							var num = 1;
+							tooltip2.select("text").text(sd_tiptext);
+							var widthText = sd_tiptext.length * 7;
+							tooltip2.selectAll("rect").attr("width", widthText);
+							tooltip2.selectAll("text").attr("x", widthText / 2);
+						});
+
+					drawRecursivePSet(node[sd.key], poly[3].x, yStart + 1/totalcats, sd.value*parentwidth, remainingCats, totalcats, color, dimstarts, sd_tiptext);
+
+					xStart += node[sd.key].fraction;
 				});
-
 			}
 
-			//draw "axis" for psets
-			var yStart = 0;
-			selectedDims.forEach(function(dim){
-				var xStart = 0;
-				sumDataTotal[dim].forEach(function(sd){
-					var axis = rightsvg.append("g");
-					
-					axis.append("path")
-						.attr("d", d3.line()([[xPset(xStart)-2, yPset(yStart)], [xPset(xStart+sd.value)+2, yPset(yStart)]]))
-						.attr("stroke", "black")
-						.style("stroke-width", 6)
-					axis.append("text")
-						.attr("x", xPset(xStart+sd.value))
-						.attr("y", yPset(yStart))
-						.attr("dy", "1.2em")
-						.attr("font-size", "12px")
-						.attr("font-weight", "bold")
-						
-						.text(sd.key)
-					xStart += sd.value;
-				});
-				yStart += 1/selectedDims.length;
-			});
+			function setBranchOpacity(n, opacity, remainingCats){
+				n.polygon.style("opacity", opacity)
+				var par = n.parent;
+				while(par.polygon != null){
+					par.polygon.style("opacity", opacity);
+					par = par.parent;
+				}
+				recChildOpacity(n, remainingCats, opacity);
+
+				function recChildOpacity(node, catlist, opacity){
+								
+					if(catlist.length == 0) return;
+
+					var cat = catlist[0];
+					var remainingCats = catlist.slice(1,catlist.length);
+					var sumData = sumDataTotal[cat];
+								
+					sumData.forEach(function(sd){
+						node[sd.key].polygon.style("opacity", opacity)
+						recChildOpacity(node[sd.key], remainingCats, 1);
+					});
+				}
+			}
+
+			
 			
 			
 			
@@ -653,9 +726,9 @@
 				.attr("font-size", "12px")
 				.attr("font-weight", "bold");
 
-				var tooltip2 = rightsvg.append("g")
-				.attr("class", "tooltip")
-				.style("display", "none");
+			var tooltip2 = rightsvg.append("g")
+			.attr("class", "tooltip")
+			.style("display", "none");
 
 			tooltip2.append("rect")
 				.attr("width", 30)
