@@ -161,7 +161,7 @@
 	titleLookUp["activities"] = "Extra-corricular activities";
 	titleLookUp["nursery"] = "Attended nursery school";
 	titleLookUp["higher"] = "Wants higher education";
-	titleLookUp["internet"] = "Internet acces at home";
+	titleLookUp["internet"] = "Internet access at home";
 	titleLookUp["romantic"] = "In a romantic relationship";
 	titleLookUp["famrel"] = "Family relationship quality";
 	titleLookUp["freetime"] = "Freetime amount";
@@ -236,6 +236,8 @@
 
         // Extract the list of dimensions we want to keep in the plot.!isNaN(data[0][d]) 
         dimensions = d3.keys(data[0]).filter(function (d) { return true })
+
+		var pset_selection = [];
 
 		var filters = [];
 		dimensions.forEach(function(category){
@@ -327,8 +329,24 @@
 			
 				var sumData = sumDataTotal[category]
 
-				
-				
+				var psSelected = pset_selection.includes(category)
+
+				var psetSelectButton = svg.append("g").append("circle")
+					.attr("cx", 0).attr("cy", xStart-20).attr("r", 10)
+					.attr("fill", psSelected ? "lime" : "lightgrey")
+					.on("mouseover", function () {
+						d3.select(this).style("cursor", "pointer"); 
+					})
+					.on("click", function(){
+						if(!psSelected){
+							pset_selection.push(category);
+						} else {
+							pset_selection.splice(pset_selection.indexOf(category), 1);
+						}
+						drawBars();
+					})
+
+
 
 				var presum = 0;
 				//----------------------------------------------------------
@@ -500,6 +518,8 @@
 						tooltip.selectAll("text").attr("x", widthText/2);
 					});
 
+				
+
 
 				//----------------------------------------------------------
 				// 						Text inside bars
@@ -529,7 +549,10 @@
 						
 						drawBars();
 					})
-					.on("mouseover", function () { tooltip.style("display", null); })
+					.on("mouseover", function () {
+						tooltip.style("display", null);
+						
+					})
 					.on("mouseout", function () { tooltip.style("display", "none"); })
 					.on("mousemove", function (d) {
 						var xPosition = d3.mouse(this)[0] - 15;
@@ -559,14 +582,14 @@
 			infoBox.x = 20;
 			infoBox.y = 0;
 			infoBox.width = width/2-20;
-			infoBox.height = 300;
+			infoBox.height = window.innerHeight * 1/4;
 			infoBox.padding = 20;
 
 			var psetsBox = [];
 			psetsBox.x = 20;
 			psetsBox.y = infoBox.y + infoBox.height+20;
 			psetsBox.width = width/2-20;
-			psetsBox.height = 300;
+			psetsBox.height = window.innerHeight * 3/4;
 
 			
 			
@@ -597,45 +620,49 @@
 			//----------------------------------------------------------
 
 			//PSETS
-			var selectedDims = ["sex", "romantic", "internet"];
+			
+			var psetOpactity = 0.5;
 
+			parsetsTree = createParsetstree(pset_selection);
+			function createParsetstree(selected_dims){
+				var parsetsTree = [];
+				recursiveDefineTree(parsetsTree, null, selected_dims);
 
-
-			var parsetsTree = [];
-			recursiveDefineTree(parsetsTree, null, selectedDims);
-
-			function recursiveDefineTree(node, prevnode, categorylist){
-				if(categorylist.length == 0) return;
-				var cat = categorylist[0];
-				var remainingCats = categorylist.slice(1,categorylist.length);
-				var sumData = sumDataTotal[cat];
-				sumData.forEach(function(sd){
-					node.fraction = 0;
-					node.polygon = null;
-					node.parent = prevnode;
-					node[sd.key] = [];
-					if(remainingCats.length>0){
-						recursiveDefineTree(node[sd.key], node, remainingCats);
-					}
-					else{
-						node[sd.key].parent = node;
-						node[sd.key].fraction = 0;
-					}
+				function recursiveDefineTree(node, prevnode, categorylist){
+					if(categorylist.length == 0) return;
+					var cat = categorylist[0];
+					var remainingCats = categorylist.slice(1,categorylist.length);
+					var sumData = sumDataTotal[cat];
+					sumData.forEach(function(sd){
+						node.fraction = 0;
+						node.polygon = null;
+						node.parent = prevnode;
+						node[sd.key] = [];
+						if(remainingCats.length>0){
+							recursiveDefineTree(node[sd.key], node, remainingCats);
+						}
+						else{
+							node[sd.key].parent = node;
+							node[sd.key].fraction = 0;
+						}
 						
+					});
+					return;
+				}
+
+
+				data.forEach(function(d){
+					var temp = parsetsTree;
+					selected_dims.forEach(function(sd){
+						temp[d[sd]].fraction += perEntry;
+						temp = temp[d[sd]];
+					});
 				});
-				return;
+
+				console.log(parsetsTree);
+				return parsetsTree;
 			}
-
-
-			data.forEach(function(d){
-				var temp = parsetsTree;
-				selectedDims.forEach(function(sd){
-					temp[d[sd]].fraction += perEntry;
-					temp = temp[d[sd]];
-				});
-			});
-
-			console.log(parsetsTree);
+			
 
 			var yPset = d3.scaleLinear()
 				.domain([0,1])
@@ -648,7 +675,6 @@
 
 		
 			drawRightSvg();
-
 			function drawRightSvg(){
 				//clear
 				rightsvg.selectAll("g").remove();
@@ -694,13 +720,13 @@
 				});
 
 				//draw psets
-				drawPSet(parsetsTree, selectedDims);
+				if(pset_selection.length > 0) drawPSet(parsetsTree, pset_selection);
 			}
 	
 
 			function drawPSet(tree, selected_dims){
 				var dimstarts = [];
-				selectedDims.forEach(function(cat){
+				selected_dims.forEach(function(cat){
 					var sumData = sumDataTotal[cat];
 					var presum = 0;
 					dimstarts[cat] = [];
@@ -722,27 +748,35 @@
 
 				//draw "axis" for psets
 				var yStart = 0;
-				selectedDims.forEach(function(dim){
+				selected_dims.forEach(function(dim){
 					var xStart = 0;
+					var axis = rightsvg.append("g");
+					axis.append("text")
+						.attr("x", xPset(1))
+						.attr("y", yPset(yStart)-5)
+						.attr("dy", "0em")
+						.attr("font-size", "16px")
+						.attr("font-weight", "bold")
+						.attr("z-index", -10)
+						.text(titleLookUp[dim])
 					sumDataTotal[dim].forEach(function(sd){
-						var axis = rightsvg.append("g");
+						var keyaxis = axis.append("g");
 					
-						axis.append("path")
+						keyaxis.append("path")
 							.attr("d", d3.line()([[xPset(xStart)-2, yPset(yStart)], [xPset(xStart+sd.value)+2, yPset(yStart)]]))
 							.attr("stroke", "black")
 							.style("stroke-width", 2)
 							.style("opacity", 0.8)
-						axis.append("text")
+						keyaxis.append("text")
 							.attr("x", xPset(xStart+sd.value))
 							.attr("y", yPset(yStart))
 							.attr("dy", "1.2em")
 							.attr("font-size", "12px")
 							.attr("font-weight", "bold")
-						
 							.text(sd.key)
 						xStart += sd.value;
 					});
-					yStart += 1/selectedDims.length;
+					yStart += 1/selected_dims.length;
 				});
 			}
 
@@ -779,7 +813,7 @@
 							}).join(" ");
 						})
 						.style("fill", color)
-						.style("opacity", 0.5)
+						.style("opacity", psetOpactity)
 						.on("mouseover", function () { 
 							tooltip2.style("display", null);
 
@@ -789,7 +823,7 @@
 						.on("mouseout", function () {
 							tooltip2.style("display", "none");
 
-							setBranchOpacity(node[sd.key], 0.5, remainingCats)
+							setBranchOpacity(node[sd.key], psetOpactity, remainingCats)
 						})
 						.on("mousemove", function (d) {
 							var xPosition = d3.mouse(this)[0] - 15;
@@ -810,15 +844,15 @@
 
 			function setBranchOpacity(n, opacity, remainingCats){
 				n.polygon.style("opacity", opacity)
+				//attempt to put selected thing in front
+				//n.polygon.raise();
 				var par = n.parent;
 				while(par.polygon != null){
 					par.polygon.style("opacity", opacity);
 					par = par.parent;
 				}
 				recChildOpacity(n, remainingCats, opacity);
-
 				function recChildOpacity(node, catlist, opacity){
-								
 					if(catlist.length == 0) return;
 
 					var cat = catlist[0];
@@ -827,7 +861,7 @@
 								
 					sumData.forEach(function(sd){
 						node[sd.key].polygon.style("opacity", opacity)
-						recChildOpacity(node[sd.key], remainingCats, 1);
+						recChildOpacity(node[sd.key], remainingCats, opacity);
 					});
 				}
 			}
