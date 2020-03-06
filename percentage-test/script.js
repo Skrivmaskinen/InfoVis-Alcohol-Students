@@ -716,7 +716,7 @@
 				var xStart = 0;
 				sumData.forEach(function(sd){
 					var sd_tiptext =  titleLookUp[cat] + ": " + getKeyName(sd.key);
-					drawRecursivePSet(parsetsTree[sd.key], xStart, 0, sd.value, remainingCats, selected_dims.length, colorbrewer.Set1[9][getIndexByKey(sumData, sd.key)%9], dimstarts, sd_tiptext);
+					drawRecursivePSet(tree[sd.key], xStart, 0, sd.value, remainingCats, selected_dims.length, colorbrewer.Set1[9][getIndexByKey(sumData, sd.key)%9], dimstarts, sd_tiptext);
 					xStart += sd.value;
 				});
 
@@ -758,34 +758,49 @@
 					//order-buttons
 					var buttonwidth = 15;
 					var buttons = rightsvg.append("g");
-					buttons.append("rect")
-						.attr("x", xPset(1)-(buttonwidth+5))
-						.attr("y", yPset(yStart)-(buttonwidth+2))
-						.attr("width", buttonwidth)
-						.attr("height", buttonwidth)
-						.style("fill", "lightgrey")
-						.on("click" )
-					buttons.append("text")
-						.attr("x", xPset(1)-(buttonwidth+5))
-						.attr("y", yPset(yStart)-(buttonwidth+2))
-						.attr("dy", "1em")
-						.attr("dx", "0.1em")
-						.style("font-size", "12px")
-						.text("▲")
 
-					buttons.append("rect")
-						.attr("x", xPset(1)-(buttonwidth+5))
-						.attr("y", yPset(yStart)+1)
-						.attr("width", buttonwidth)
-						.attr("height", buttonwidth)
-						.style("fill", "lightgrey")
-					buttons.append("text")
-						.attr("x", xPset(1)-(buttonwidth+5))
-						.attr("y", yPset(yStart)+1)
-						.attr("dy", "1em")
-						.attr("dx", "0.1em")
-						.style("font-size", "12px")
-						.text("▼")
+					if(dim != selected_dims[0]){
+						buttons.append("rect")
+							.attr("x", xPset(1)-(buttonwidth+5))
+							.attr("y", yPset(yStart)-(buttonwidth+2))
+							.attr("width", buttonwidth)
+							.attr("height", buttonwidth)
+							.style("fill", "lightgrey")
+							.on("click", function(d){
+								swapSelecteds(dim, -1)
+								drawBars();
+							}) 
+						buttons.append("text")
+							.attr("pointer-events", "none")
+							.attr("x", xPset(1)-(buttonwidth+5))
+							.attr("y", yPset(yStart)-(buttonwidth+2))
+							.attr("dy", "1em")
+							.attr("dx", "0.1em")
+							.style("font-size", "12px")
+							.text("▲")
+					}
+					
+					
+					if(dim != selected_dims[selected_dims.length - 1]){
+						buttons.append("rect")
+							.attr("x", xPset(1)-(buttonwidth+5))
+							.attr("y", yPset(yStart)+1)
+							.attr("width", buttonwidth)
+							.attr("height", buttonwidth)
+							.style("fill", "lightgrey")
+							.on("click", function(d){
+								swapSelecteds(dim, 1)
+								drawBars();
+							}) 
+						buttons.append("text")
+							.attr("pointer-events", "none")
+							.attr("x", xPset(1)-(buttonwidth+5))
+							.attr("y", yPset(yStart)+1)
+							.attr("dy", "1em")
+							.attr("dx", "0.1em")
+							.style("font-size", "12px")
+							.text("▼")
+					}
 
 					buttons.append("rect")
 						.attr("x",  xPset(0)+5)
@@ -793,7 +808,12 @@
 						.attr("width", buttonwidth)
 						.attr("height", buttonwidth)
 						.style("fill", "lightgrey")
+						.on("click", function(d){
+							selected_dims.splice(selected_dims.indexOf(dim), 1);
+							drawBars();
+						}) 
 					buttons.append("text")
+						.attr("pointer-events", "none")
 						.attr("x", xPset(0)+5)
 						.attr("y", yPset(yStart)-buttonwidth/2)
 						.attr("dy", "1em")
@@ -805,8 +825,12 @@
 				});
 
 				// dir 1 or -1 for up or down
-				function swapSelecteds(dir){
-					selected_dims
+				function swapSelecteds(dim,dir){
+					console.log("awda");
+					var index = selected_dims.indexOf(dim);
+					var temp = selected_dims[index];
+					selected_dims[index] = selected_dims[index + dir];
+					selected_dims[index + dir] = temp;
 				}
 			}
 
