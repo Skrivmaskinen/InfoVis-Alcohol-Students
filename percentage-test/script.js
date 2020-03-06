@@ -9,14 +9,7 @@
 				/*
 				// Swap 1 and 0 to make F red and M blue. 
 				// Should probably be implemented with a more exact solution.
-				if(i === 1)
-				{
-					return 0;
-				}
-				if(i === 0)
-				{
-					return 1;
-				}
+				
 				*/
 
 				return i;
@@ -29,8 +22,9 @@
 		return -1;
 	}
 
-			let bad_grade = 10;
-			let medium_grade = 15;
+
+	let bad_grade = 10;
+	let medium_grade = 15;
 	function bucketfyData(data, bucketSpan)
 	{
 		//console.log(data[dimension]);
@@ -397,6 +391,117 @@
 						return "";
 					}
 				}
+
+				function getColor(d, isBigBar)
+				{
+
+					let categoryFiltered = filters[category].length > 0;
+					let keyFiltered = filters[category].includes(d.key);
+
+					//console.log("categoryFiltered: " + categoryFiltered + " keyFiltered: " + keyFiltered )
+
+					let saturated = true;
+					if(isBigBar)
+					{
+						if(categoryFiltered && !keyFiltered)
+						{
+							saturated = false;
+						}
+					}
+					else
+					{
+						if(!(categoryFiltered && keyFiltered))
+						{
+							saturated = false;
+						}
+					}
+
+					switch(category)
+					{
+
+						// Binary data
+						case "school":
+						case "sex":
+						case "address":
+						case "famsize":
+						case "Pstatus":
+						case "schoolsup":
+						case "paid":
+						case "activities":
+						case "nursery":
+						case "higher":
+						case "internet":
+						case "romantic":
+						case "famsup":
+
+						let swappedIndex;
+						if(getIndexByKey(sumData, d.key) === 1)
+						{
+							swappedIndex = 0;
+						}
+						if(getIndexByKey(sumData, d.key) === 0)
+						{
+							swappedIndex =  1;
+						}
+
+						if(saturated)
+							return colorbrewer.Set1[3][swappedIndex];
+						else
+							return colorbrewer.Pastel1[3][swappedIndex]
+
+						break;
+
+							 
+						break;
+						/*
+						// Numerical data
+						case "age":
+						case "Medu":
+						case "Fedu":
+						case "traveltime":
+						case "studytime":
+						case "failures":
+						case "famrel":
+						case "freetime":
+						case "goout":
+						case "Dalc":
+						case "Walc":
+						case "health":
+						case "absences":
+
+						if(saturated)
+							return colorbrewer.BrBG[9][8-getIndexByKey(sumData, d.key)%9];
+						else
+							return colorbrewer.BrBG[9][getIndexByKey(sumData, d.key)%9]
+						*/
+						// Categorical data
+						default:
+
+							if( saturated)
+								return colorbrewer.Set1[9][getIndexByKey(sumData, d.key)%9];
+							else
+								return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9]
+
+							break; 
+					}
+
+					if(category === "Mjob")
+					{
+						
+						if(filters[category].length > 0 && filters[category].includes(d.key))
+							return colorbrewer.Set1[9][getIndexByKey(sumData, d.key)%9];
+						else
+							return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9];
+					}
+					else
+					{
+						// numerical
+						if(filters[category].length > 0 && filters[category].includes(d.key))
+							return colorbrewer.YlOrRd[9][getIndexByKey(sumData, d.key)%9];
+						else
+							return colorbrewer.Greys[9][getIndexByKey(sumData, d.key)%9];;
+					}
+				}
 				
 				//----------------------------------------------------------
 				// 						Small bar
@@ -412,12 +517,14 @@
 					.enter().append("rect")
 					.style("fill", function (d, i) { 
 						// categorical
-
+						/*
 							if(filters[category].length > 0 && filters[category].includes(d.key))
 								return colorbrewer.Set1[9][getIndexByKey(sumData, d.key)%9];
 							else
 								return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9];
-							/*
+						*/
+						return getColor(d, false);
+						/*
 						if(category === "Mjob")
 						{
 							
@@ -484,12 +591,13 @@
 								return colorbrewer.YlOrRd[9][getIndexByKey(sumData, d.key)%9];
 						}*/
 
-
+						return getColor(d, true);
+						/*
 						if(filters[category].length > 0 && !filters[category].includes(d.key))
 							return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9];
 						else
 							return colorbrewer.Set1[9][getIndexByKey(sumData, d.key)%9];
-					})
+					*/})
 					.attr("y", xStart)
 					.attr("height", barWidth)
 					.attr("x", function(d, i) { return y(presum += d.value) })
