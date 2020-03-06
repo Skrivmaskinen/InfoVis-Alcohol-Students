@@ -372,7 +372,7 @@
 						.attr("width", width/2 + backborderwidth*2)
 				}
 				
-				function dataDiffFromKey(key )
+				function dataDiffFromKey(key)
 				{
 			 		let startValue = sumData[getIndexByKey(sumData, key)].value;
 			 		let changedValue =  sumFilteredData[getIndexByKey(sumFilteredData, key)].value;
@@ -499,7 +499,7 @@
 							filters[category].push(d.key);
 							if(filters[category].length==sumData.length) filters[category] = [];
 						} else {
-							filters[category].pop(d.key);
+							filters[category].splice(filters[category].indexOf(d.key), 1);
 						}
 						
 						drawBars();
@@ -530,6 +530,7 @@
 					.data(sumFilteredData)
 					.enter()
 					.append("text")
+					.attr("pointer-events", "none")
 					.text(function(d){ return (d.value > 0.05 ? trim(d.key, getKeyName( d.key)) + productToSymbol(dataDiffFromKey(d.key), 0.1): "")})
 					.attr("y", xStart + barWidth/2)
 					.attr("x", function(d, i) { presum += d.value; return y(presum - d.value/2)+5 })
@@ -537,34 +538,7 @@
 					.style("font-size", barTextSize)
 					.style("max-width", "20px")
 					.style("fill", "white")
-					.style("user-select", "none")
-					.on('click', function(d,i){
-						if(!filters[category].includes(d.key)){
-							filters[category].push(d.key);
-							if(filters[category].length==sumData.length) filters[category] = [];
-							
-						} else {
-							filters[category].pop(d.key);
-						}
-						
-						drawBars();
-					})
-					.on("mouseover", function () {
-						tooltip.style("display", null);
-						
-					})
-					.on("mouseout", function () { tooltip.style("display", "none"); })
-					.on("mousemove", function (d) {
-						var xPosition = d3.mouse(this)[0] - 15;
-						var yPosition = d3.mouse(this)[1] - 25;
-						tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
-						var num = d.value * 100;
-						var tooltipText = getKeyName(d.key) + ": " + num.toFixed(0) + "% " + dataDiffFromKey(d.key) + " of unfiltered";
-						tooltip.select("text").text(tooltipText);
-						var widthText = tooltipText.length * 7;
-						tooltip.selectAll("rect").attr("width", widthText);
-						tooltip.selectAll("text").attr("x", widthText / 2);
-					});
+					
 
 				function trim(key, text){
 
@@ -752,6 +726,7 @@
 					var xStart = 0;
 					var axis = rightsvg.append("g");
 					axis.append("text")
+						.attr("pointer-events", "none")
 						.attr("x", xPset(1))
 						.attr("y", yPset(yStart)-5)
 						.attr("dy", "0em")
@@ -768,16 +743,71 @@
 							.style("stroke-width", 2)
 							.style("opacity", 0.8)
 						keyaxis.append("text")
+							.attr("pointer-events", "none")
 							.attr("x", xPset(xStart+sd.value))
 							.attr("y", yPset(yStart))
 							.attr("dy", "1.2em")
 							.attr("font-size", "12px")
 							.attr("font-weight", "bold")
-							.text(sd.key)
+							.text( getKeyName(sd.key))
 						xStart += sd.value;
 					});
+
+					
+
+					//order-buttons
+					var buttonwidth = 15;
+					var buttons = rightsvg.append("g");
+					buttons.append("rect")
+						.attr("x", xPset(1)-(buttonwidth+5))
+						.attr("y", yPset(yStart)-(buttonwidth+2))
+						.attr("width", buttonwidth)
+						.attr("height", buttonwidth)
+						.style("fill", "lightgrey")
+						.on("click" )
+					buttons.append("text")
+						.attr("x", xPset(1)-(buttonwidth+5))
+						.attr("y", yPset(yStart)-(buttonwidth+2))
+						.attr("dy", "1em")
+						.attr("dx", "0.1em")
+						.style("font-size", "12px")
+						.text("▲")
+
+					buttons.append("rect")
+						.attr("x", xPset(1)-(buttonwidth+5))
+						.attr("y", yPset(yStart)+1)
+						.attr("width", buttonwidth)
+						.attr("height", buttonwidth)
+						.style("fill", "lightgrey")
+					buttons.append("text")
+						.attr("x", xPset(1)-(buttonwidth+5))
+						.attr("y", yPset(yStart)+1)
+						.attr("dy", "1em")
+						.attr("dx", "0.1em")
+						.style("font-size", "12px")
+						.text("▼")
+
+					buttons.append("rect")
+						.attr("x",  xPset(0)+5)
+						.attr("y", yPset(yStart)-buttonwidth/2)
+						.attr("width", buttonwidth)
+						.attr("height", buttonwidth)
+						.style("fill", "lightgrey")
+					buttons.append("text")
+						.attr("x", xPset(0)+5)
+						.attr("y", yPset(yStart)-buttonwidth/2)
+						.attr("dy", "1em")
+						.attr("dx", "0.2em")
+						.style("font-size", "12px")
+						.text("✖")
+
 					yStart += 1/selected_dims.length;
 				});
+
+				// dir 1 or -1 for up or down
+				function swapSelecteds(dir){
+					selected_dims
+				}
 			}
 
 			function drawRecursivePSet(node, xStart, yStart, parentwidth, categorylist, totalcats, color, dimstarts, tooltip_text){
