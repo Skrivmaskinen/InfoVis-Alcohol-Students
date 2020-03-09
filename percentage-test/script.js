@@ -516,31 +516,8 @@
 					.data(sumData)
 					.enter().append("rect")
 					.style("fill", function (d, i) { 
-						// categorical
-						/*
-							if(filters[category].length > 0 && filters[category].includes(d.key))
-								return colorbrewer.Set1[9][getIndexByKey(sumData, d.key)%9];
-							else
-								return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9];
-						*/
+						
 						return getColor(d, false);
-						/*
-						if(category === "Mjob")
-						{
-							
-							if(filters[category].length > 0 && filters[category].includes(d.key))
-								return colorbrewer.Set1[9][getIndexByKey(sumData, d.key)%9];
-							else
-								return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9];
-						}
-						else
-						{
-							// numerical
-							if(filters[category].length > 0 && filters[category].includes(d.key))
-								return colorbrewer.YlOrRd[9][getIndexByKey(sumData, d.key)%9];
-							else
-								return colorbrewer.Greys[9][getIndexByKey(sumData, d.key)%9];;
-						}*/
 
 					})
 					.attr("y", xStart + barWidth)
@@ -573,31 +550,9 @@
 					.enter().append("rect")
 					.attr("class", "bigBar")
 					.style("fill", function(d, i) {
-						// categorical
-						/*if(category === "Mjob")
-						{
-							// numerical
-							if(filters[category].length > 0 && !filters[category].includes(d.key))
-								return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9];
-							else
-								return colorbrewer.Set1[9][getIndexByKey(sumData, d.key)%9];;
-						}
-						else
-						{
-							// numerical
-							if(filters[category].length > 0 && !filters[category].includes(d.key))
-								return colorbrewer.Greys[9][getIndexByKey(sumData, d.key)%9];
-							else
-								return colorbrewer.YlOrRd[9][getIndexByKey(sumData, d.key)%9];
-						}*/
 
 						return getColor(d, true);
-						/*
-						if(filters[category].length > 0 && !filters[category].includes(d.key))
-							return colorbrewer.Pastel1[9][getIndexByKey(sumData, d.key)%9];
-						else
-							return colorbrewer.Set1[9][getIndexByKey(sumData, d.key)%9];
-					*/})
+						})
 					.attr("y", xStart)
 					.attr("height", barWidth)
 					.attr("x", function(d, i) { return y(presum += d.value) })
