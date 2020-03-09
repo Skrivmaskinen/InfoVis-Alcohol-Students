@@ -330,6 +330,7 @@
 					.attr("fill", psSelected ? "lime" : "lightgrey")
 					.on("mouseover", function () {
 						d3.select(this).style("cursor", "pointer"); 
+						tooltip.style("display", null);
 					})
 					.on("click", function(){
 						if(!psSelected){
@@ -524,7 +525,9 @@
 					.attr("height", sideBarWidth)
 					.attr("x", function (d, i) { return y(presum += d.value) })
 					.attr("width", function (d, i) { return y(1 - d.value) })
-					.on("mouseover", function () { tooltip.style("display", null); })
+					.on("mouseover", function () {
+						tooltip.style("display", null);
+					})
 					.on("mouseout", function () { tooltip.style("display", "none"); })
 					.on("mousemove", function (d) {
 						var xPosition = d3.mouse(this)[0] - 15;
@@ -567,7 +570,10 @@
 						
 						drawBars();
 					})
-					.on("mouseover", function () { tooltip.style("display", null); })
+					.on("mouseover", function () {
+						d3.select(this).style("cursor", "pointer"); 
+						tooltip.style("display", null);
+					})
 					.on("mouseout", function () { tooltip.style("display", "none"); })
 					.on("mousemove", function (d) {
 						var xPosition = d3.mouse(this)[0] - 15;
@@ -778,8 +784,46 @@
 				var sumData = sumDataTotal[cat];
 				var xStart = 0;
 				sumData.forEach(function(sd){
+					function colorind(){
+						let swappedIndex = getIndexByKey(sumData, sd.key)%9;
+						switch(cat)
+						{
+							// Binary data
+							case "school":
+							case "sex":
+							case "address":
+							case "famsize":
+							case "Pstatus":
+							case "schoolsup":
+							case "paid":
+							case "activities":
+							case "nursery":
+							case "higher":
+							case "internet":
+							case "romantic":
+							case "famsup":
+
+						
+							if(swappedIndex === 1)
+							{
+								swappedIndex = 0;
+							}
+							else if(swappedIndex === 0)
+							{
+								swappedIndex =  1;
+							}
+							break;
+
+							default:
+								//do nothing
+						}
+						return swappedIndex;
+						
+					}
+					
+							
 					var sd_tiptext =  titleLookUp[cat] + ": " + getKeyName(sd.key);
-					drawRecursivePSet(tree[sd.key], xStart, 0, sd.value, remainingCats, selected_dims.length, colorbrewer.Set1[9][getIndexByKey(sumData, sd.key)%9], dimstarts, sd_tiptext);
+					drawRecursivePSet(tree[sd.key], xStart, 0, sd.value, remainingCats, selected_dims.length, colorbrewer.Set1[9][colorind()], dimstarts, sd_tiptext);
 					xStart += sd.value;
 				});
 
@@ -829,6 +873,9 @@
 							.attr("width", buttonwidth)
 							.attr("height", buttonwidth)
 							.style("fill", "lightgrey")
+							.on("mouseover", function () {
+								d3.select(this).style("cursor", "pointer"); 
+							})
 							.on("click", function(d){
 								swapSelecteds(dim, -1)
 								drawBars();
@@ -851,6 +898,9 @@
 							.attr("width", buttonwidth)
 							.attr("height", buttonwidth)
 							.style("fill", "lightgrey")
+							.on("mouseover", function () {
+								d3.select(this).style("cursor", "pointer"); 
+							})
 							.on("click", function(d){
 								swapSelecteds(dim, 1)
 								drawBars();
@@ -871,6 +921,9 @@
 						.attr("width", buttonwidth)
 						.attr("height", buttonwidth)
 						.style("fill", "lightgrey")
+						.on("mouseover", function () {
+							d3.select(this).style("cursor", "pointer"); 
+						})
 						.on("click", function(d){
 							selected_dims.splice(selected_dims.indexOf(dim), 1);
 							drawBars();
