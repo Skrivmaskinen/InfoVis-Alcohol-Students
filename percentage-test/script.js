@@ -253,13 +253,13 @@
 					return nanCategory ? d3.descending(x.key, y.key) : d3.descending(+x.key, +y.key);
 				})
 		});
-		console.log("sumDataTotal.absences:")
-		console.log(sumDataTotal.absences);
+		//console.log("sumDataTotal.absences:")
+		//console.log(sumDataTotal.absences);
 
 		//sumDataTotal.absences = histofyList(sumDataTotal.absences, 5);
 
-		console.log("sumDataTotal.absences (changed?):")
-		console.log(sumDataTotal.absences);
+		//console.log("sumDataTotal.absences (changed?):")
+		//console.log(sumDataTotal.absences);
 		function filterCheck(d, cat = null){
 			var include = true;
 			dimensions.forEach(function(category){
@@ -681,11 +681,11 @@
 			function keyNamesOfFilters(filters)
 			{
 				filters.sort();
-				console.log(filters);
+				//console.log(filters);
 				let outputString = "";
 				for(let i = 0; i < filters.length; ++i)
 				{
-					console.log(getKeyName(filters[i]));
+					//console.log(getKeyName(filters[i]));
 					outputString = outputString + getKeyName(filters[i]);
 					if(i + 1 < filters.length)
 					{
@@ -741,7 +741,7 @@
 					});
 				});
 
-				console.log(parsetsTree);
+				//console.log(parsetsTree);
 				return parsetsTree;
 			}
 			
@@ -934,7 +934,7 @@
 
 				// dir 1 or -1 for up or down
 				function swapSelecteds(dim,dir){
-					console.log("awda");
+					//console.log("awda");
 					var index = selected_dims.indexOf(dim);
 					var temp = selected_dims[index];
 					selected_dims[index] = selected_dims[index + dir];
