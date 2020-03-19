@@ -504,7 +504,8 @@
 				}
 				
 				//----------------------------------------------------------
-				// 						Small bar
+			    // 						Small bar
+			    // Built upon code from http://bl.ocks.org/mstanaland/6100713
 				//----------------------------------------------------------
 				var presum = 0;
 
@@ -566,7 +567,8 @@
 
 				
 				//----------------------------------------------------------
-				// 						Large bar
+			    // 						Large bar
+			    // Built upon code from http://bl.ocks.org/mstanaland/6100713
 				//----------------------------------------------------------
 				var bar = svg.append("g");
 				var presum = 0;
